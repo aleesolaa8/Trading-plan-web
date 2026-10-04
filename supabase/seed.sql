@@ -5,14 +5,24 @@
 -- PENDIENTE: revisión humana de todos los textos antes de producción.
 -- =====================================================================
 
--- Planes: arquitectura para 4 niveles, solo Core activo.
--- El precio real se lee de Stripe (STRIPE_PRICE_CORE); price_cents es caché.
-insert into public.plans (id, name, is_active, trial_days, features, sort_order) values
-  ('free',    'Free',    false, 0, '{"ai_plan_generations":1,"ai_reviews_per_month":0}', 0),
-  ('core',    'Core',    true,  7, '{"ai_plan_generations":5,"ai_reviews_per_month":4}', 1),
-  ('pro',     'Pro',     false, 7, '{"ai_plan_generations":20,"ai_reviews_per_month":8}', 2),
-  ('premium', 'Premium', false, 7, '{"ai_plan_generations":50,"ai_reviews_per_month":31}', 3)
-on conflict (id) do nothing;
+-- Planes: Core (14,99 € + IVA) y Pro (24,99 € + IVA) activos.
+-- El precio real se lee de Stripe (STRIPE_PRICE_CORE / STRIPE_PRICE_PRO); price_cents es caché.
+-- features decide qué ve cada plan: cambiar un límite no requiere desplegar.
+insert into public.plans (id, name, is_active, price_cents, trial_days, features, sort_order) values
+  ('free',    'Free',    false, null, 0,
+   '{"ai_plan_generations":1,"copilot_messages_per_month":0,"ai_weekly_review":false}', 0),
+  ('core',    'Core',    true,  1499, 7,
+   '{"ai_plan_generations":3,"copilot_messages_per_month":30,"ai_weekly_review":false,
+     "ai_screenshot_review":false,"advanced_stats":false,"funded_mode":false,
+     "max_accounts":1,"reminders":false,"export":false}', 1),
+  ('pro',     'Pro',     true,  2499, 7,
+   '{"ai_plan_generations":20,"copilot_messages_per_month":1500,"ai_weekly_review":true,
+     "ai_screenshot_review":true,"advanced_stats":true,"funded_mode":true,
+     "max_accounts":3,"reminders":true,"export":true}', 2),
+  ('premium', 'Premium', false, null, 7, '{}', 3)
+on conflict (id) do update set name = excluded.name, is_active = excluded.is_active,
+  price_cents = excluded.price_cents, trial_days = excluded.trial_days,
+  features = excluded.features, sort_order = excluded.sort_order;
 
 -- ---------------------------------------------------------------------
 -- Plantillas de protocolo (user_id NULL)

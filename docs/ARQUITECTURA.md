@@ -153,7 +153,7 @@ avisos:    lotes < lote_mínimo     → "no alcanza el lote mínimo"
 
 ### 5.7 Stripe y acceso
 - Checkout con `STRIPE_PRICE_CORE` (o `plans.stripe_price_id`), `automatic_tax` activado y prueba de `trial_days` desde `plans`.
-- **Precio decidido: 14,99 € + IVA al mes.** En Stripe el precio se crea con `tax_behavior = exclusive`; Stripe Tax suma el IVA del país del cliente en el pago.
+- **Precios decididos: Core 14,99 € + IVA y Pro 24,99 € + IVA al mes** (`STRIPE_PRICE_CORE`, `STRIPE_PRICE_PRO`). En Stripe el precio se crea con `tax_behavior = exclusive`; Stripe Tax suma el IVA del país del cliente en el pago.
 - Webhooks: `checkout.session.completed`, `customer.subscription.created|updated|deleted`, `invoice.payment_failed` → actualizan `subscriptions`. Firma verificada e idempotencia con `stripe_events`.
 - `middleware.ts` + `has_active_access()` protegen la zona `(app)`; sin suscripción → página de precios.
 
@@ -211,12 +211,38 @@ NEXT_PUBLIC_SITE_URL=
 | Arquitectura y esquema | Aprobados |
 | Paleta | "Terminal" (verde / azul / rojo solo para riesgo) |
 | Marca | **Time to Trade** |
-| Precio | **14,99 € + IVA** al mes (Stripe `tax_behavior = exclusive`) |
+| Precio | **Core 14,99 € + IVA** y **Pro 24,99 € + IVA** al mes (Stripe `tax_behavior = exclusive`) |
 | Límite de riesgo | Lo fija cada usuario en su plan |
 | IA | **Claude (Anthropic)**, siempre desde el servidor |
 | Trial | 7 días en Core (editable en `plans`) |
 
 Pendiente: reenviar el brief maestro, el prototipo HTML y las capturas de Gotoyou.
+
+## 7 bis. Planes y precios
+
+Principio: **Core es completo** para operar con un plan (nadie se queda fuera por no pagar Pro). Pro suma lo que cuesta más (IA intensiva) y lo que piden quienes operan muchas horas o con cuenta de fondeo.
+
+| | **Core · 14,99 € + IVA/mes** | **Pro · 24,99 € + IVA/mes** |
+|---|---|---|
+| Diagnóstico, plan con tus reglas y versiones | Sí (3 regeneraciones con IA/mes) | Sí (20/mes) |
+| Protocolos editables | Sí | Sí |
+| Calendario semanal (trading y vida) | Sí | Sí |
+| Calculadora para cualquier mercado y checklist | Sí | Sí |
+| Journal ilimitado + patrones sin juicio | Sí | Sí |
+| Resumen semanal de números | Sí | Sí |
+| Copiloto 24 h | 30 mensajes/mes (para probarlo) | Sin límite (uso razonable: 1.500/mes) |
+| Revisión semanal escrita por IA con propuestas al plan | — | Sí |
+| IA que revisa capturas contra el setup escrito (sin señales) | — | Sí |
+| Estadísticas avanzadas (mercado, hora, día, emoción, rachas) | — | Sí |
+| Modo cuenta de fondeo (límites de la prueba y avisos) | — | Sí |
+| Varias cuentas o planes | 1 | Hasta 3 |
+| Recordatorios de sesión y de límite diario | — | Sí |
+| Exportar plan y journal (PDF/CSV) | — | Sí |
+
+- 7 días de prueba con todo Pro; al acabar, el usuario elige plan. Sin permanencia; cambio de plan desde el Customer Portal.
+- Los límites viven en `plans.features` (JSON): se cambian sin desplegar.
+- Opcional, a decidir: pago anual con 2 meses gratis (149,90 € y 249,90 € + IVA).
+- Cuando el usuario de Core llega a su límite del copiloto, ve un aviso amable con la opción de pasar a Pro; nunca se bloquea el resto de la app.
 
 ## 8 bis. Copiloto 24 h (chat con IA)
 

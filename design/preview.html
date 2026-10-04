@@ -260,10 +260,18 @@ ul.crosses li::before{content:"×";color:var(--red);font-size:20px;line-height:1
 .card.yes{border-color:color-mix(in srgb,var(--green) 40%,var(--line))}
 
 /* Precio */
-.price-card{max-width:560px;margin-inline:auto;text-align:left;border:1px solid color-mix(in srgb,var(--green) 50%,var(--line));box-shadow:0 0 0 6px var(--green-soft),0 40px 120px -40px rgba(31,224,140,.35)}
+.plans{display:grid;gap:16px;max-width:1000px;margin-inline:auto;grid-template-columns:minmax(0,1fr)}
+.plan{display:flex;flex-direction:column;gap:6px}
+.plan ul.arrows{margin-bottom:8px}
+.plan .btn{width:100%;margin-top:auto}
+.plan-for{color:var(--muted);margin-top:12px!important;font-weight:600}
+.plan-plus{font-weight:800;margin-top:6px!important;color:var(--text)!important}
+.plan-top{display:flex;flex-wrap:wrap;gap:8px}
+.plan-pro{border:1px solid color-mix(in srgb,var(--green) 50%,var(--line));box-shadow:0 0 0 6px var(--green-soft),0 40px 120px -40px rgba(31,224,140,.35)}
+.plans-note{text-align:center;margin-top:20px;font-size:14px}
+@media(min-width:860px){.plans{grid-template-columns:repeat(2,minmax(0,1fr))}.plan-for{min-height:3.2em}}
 .price{display:flex;align-items:baseline;gap:8px;margin:18px 0 6px}
 .price strong{font-size:72px;font-weight:900;letter-spacing:-.06em;line-height:1}
-.price-card .btn{width:100%;margin-top:26px}
 
 /* FAQ */
 .faq{display:grid;gap:10px;max-width:860px}
@@ -520,24 +528,48 @@ footer{border-top:1px solid var(--line);padding:48px 0 40px;font-size:14px;color
 
 <!-- ============ PRECIO ============ -->
 <section class="sec" id="precio">
-  <div class="wrap" style="text-align:center">
-    <div class="sec-head reveal" style="margin-inline:auto;justify-items:center">
+  <div class="wrap">
+    <div class="sec-head reveal" style="margin-inline:auto;justify-items:center;text-align:center">
       <span class="eyebrow"><span class="dot"></span>Precio</span>
-      <h2>Un plan. <span class="hl">Todo incluido.</span></h2>
+      <h2>Dos planes. <span class="hl">Los dos completos.</span></h2>
+      <p class="lead" style="margin-inline:auto">Con Core tienes todo lo necesario para operar con un plan. Pro suma la IA sin límites y las herramientas de quien va en serio. 7 días de prueba gratis.</p>
     </div>
-    <div class="card price-card reveal">
-      <span class="chip">Core</span>
-      <div class="price"><strong>14,99 €</strong><span class="muted">+ IVA / mes</span></div>
-      <p class="muted" style="margin:0">El IVA se calcula en el pago según tu país. Cancela cuando quieras.</p>
-      <ul class="arrows">
-        <li>Diagnóstico y plan generado con tus reglas</li>
-        <li>Protocolos de conducta editables</li>
-        <li>Calendario de vida con bloques movibles</li>
-        <li>Calculadora de riesgo y checklist</li>
-        <li>Journal con patrones y revisión semanal</li>
-      </ul>
-      <a href="#top" class="btn btn-primary btn-xl">Empezar ahora <span class="arr">→</span></a>
+    <div class="plans">
+      <article class="card plan reveal">
+        <span class="chip">Core</span>
+        <p class="plan-for">Para operar con un plan y cumplirlo</p>
+        <div class="price"><strong>14,99 €</strong><span class="muted">+ IVA / mes</span></div>
+        <ul class="arrows">
+          <li>Diagnóstico de 7 preguntas y plan con tus reglas</li>
+          <li>Protocolos de conducta editables</li>
+          <li>Calendario semanal: trading y vida</li>
+          <li>Calculadora de riesgo para cualquier mercado</li>
+          <li>Checklist antes de cada entrada</li>
+          <li>Journal ilimitado con patrones sin juicio</li>
+          <li>Resumen semanal de tus números</li>
+          <li>Copiloto: 30 mensajes al mes</li>
+        </ul>
+        <a href="#top" class="btn btn-ghost btn-xl">Empezar con Core <span class="arr">→</span></a>
+      </article>
+      <article class="card plan plan-pro reveal">
+        <div class="plan-top"><span class="chip">Pro</span><span class="chip blue">El más completo</span></div>
+        <p class="plan-for">Para quien opera muchas horas o con cuenta de fondeo</p>
+        <div class="price"><strong>24,99 €</strong><span class="muted">+ IVA / mes</span></div>
+        <p class="plan-plus">Todo lo de Core, y además:</p>
+        <ul class="arrows">
+          <li><b>Copiloto 24 h sin límite</b>: habla con él cuando lo necesites</li>
+          <li>Revisión semanal escrita por IA con propuestas para tu plan</li>
+          <li>La IA revisa tus capturas contra tu setup escrito</li>
+          <li>Estadísticas avanzadas: por mercado, hora, día y emoción</li>
+          <li>Modo cuenta de fondeo: límites de la prueba y avisos</li>
+          <li>Hasta 3 cuentas o planes distintos</li>
+          <li>Recordatorios de sesión y de límite diario</li>
+          <li>Exporta tu plan y tu journal (PDF y CSV)</li>
+        </ul>
+        <a href="#top" class="btn btn-primary btn-xl">Probar Pro 7 días gratis <span class="arr">→</span></a>
+      </article>
     </div>
+    <p class="muted plans-note">El IVA se calcula en el pago según tu país. Cambia de plan o cancela cuando quieras, sin permanencia.</p>
   </div>
 </section>
 
