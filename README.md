@@ -46,3 +46,4 @@ npm run build
 - `src/proxy.ts`: refresca la sesión y protege `/panel`
 - `supabase/`: esquema con RLS y contenido editable del diagnóstico
 - `design/preview.html`: vista previa de la landing
+- `design/demo.html`: demo usable (diagnóstico, plan, calculadora y copiloto con IA)

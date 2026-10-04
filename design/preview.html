@@ -385,7 +385,7 @@ footer{border-top:1px solid var(--line);padding:48px 0 40px;font-size:14px;color
     <div class="stat"><strong>6</strong><span>preguntas para un diagnóstico que te explica el porqué</span></div>
     <div class="stat"><strong>1</strong><span>plan escrito con tus reglas, versionado</span></div>
     <div class="stat"><strong>0</strong><span>señales de compra o venta. Nunca.</span></div>
-    <div class="stat"><strong>3</strong><span>activos en la calculadora: US100, GER40 y el tuyo</span></div>
+    <div class="stat"><strong>24 h</strong><span>copiloto para hablar cuando lo necesites</span></div>
   </div>
 </div>
 
@@ -439,14 +439,14 @@ footer{border-top:1px solid var(--line);padding:48px 0 40px;font-size:14px;color
       <article class="card b-calc reveal">
         <span class="chip">Calculadora de riesgo</span>
         <h3 style="margin-top:16px">El tamaño exacto, antes de cada entrada.</h3>
-        <p>Introduce los datos de tu bróker una vez y se guardan por activo. Redondeo hacia abajo siempre.</p>
+        <p>Cualquier mercado: índices, forex, oro, cripto o acciones. Pones los datos de tu bróker una vez y se guardan. Redondeo hacia abajo siempre.</p>
         <div class="demo">
           <form class="calc" id="calc" onsubmit="return false">
             <label class="field full">Activo
-              <select id="c-asset"><option>US100</option><option>GER40</option><option>Personalizado</option></select></label>
+              <select id="c-asset"><option>XAUUSD · Oro</option><option>US100 · Nasdaq</option><option>EURUSD</option><option>GER40 · DAX</option><option>BTCUSD</option><option>Otro mercado…</option></select></label>
             <label class="field">Capital (€)<input id="c-bal" inputmode="decimal" value="10000"></label>
             <label class="field">Riesgo %<input id="c-risk" inputmode="decimal" value="0.5"></label>
-            <label class="field">Stop (puntos)<input id="c-sl" inputmode="decimal" value="40"></label>
+            <label class="field">Stop (puntos/pips)<input id="c-sl" inputmode="decimal" value="40"></label>
             <label class="field">€ por punto (1 lote)<input id="c-vpp" inputmode="decimal" value="1"></label>
             <label class="field">Lote mínimo<input id="c-min" inputmode="decimal" value="0.1"></label>
             <label class="field">Paso de lote<input id="c-step" inputmode="decimal" value="0.1"></label>

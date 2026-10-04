@@ -35,7 +35,7 @@ export default function Home() {
             { value: '6', label: 'preguntas para un diagnóstico que te explica el porqué' },
             { value: '1', label: 'plan escrito con tus reglas, versionado' },
             { value: '0', label: 'señales de compra o venta. Nunca.' },
-            { value: '3', label: 'activos en la calculadora: US100, GER40 y el tuyo' },
+            { value: '24 h', label: 'copiloto para hablar cuando lo necesites' },
           ]}
         />
       </div>

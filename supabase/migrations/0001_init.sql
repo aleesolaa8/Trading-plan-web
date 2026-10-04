@@ -238,13 +238,17 @@ create trigger calendar_blocks_updated before update on public.calendar_blocks
   for each row execute function public.set_updated_at();
 
 -- ---------------------------------------------------------------------
--- 6. Calculadora: ajustes por activo (los introduce el usuario)
+-- 6. Calculadora: mercados del usuario (cualquiera) y sus datos de contrato
+-- El catálogo de la interfaz solo sugiere nombres; los valores los introduce
+-- el usuario porque cambian según el bróker.
 -- ---------------------------------------------------------------------
 create table public.assets (
   id              uuid primary key default gen_random_uuid(),
   user_id         uuid not null references auth.users(id) on delete cascade,
-  preset          text not null check (preset in ('US100','GER40','custom')),
-  name            text not null,
+  name            text not null check (char_length(name) between 1 and 30),  -- 'XAUUSD', 'US100', 'Café'…
+  category        text not null default 'otro' check (category in
+                    ('indices','forex','materias_primas','cripto','acciones','futuros','otro')),
+  is_traded       boolean not null default true,      -- forma parte de los mercados de su plan
   value_per_point numeric(14,6) check (value_per_point > 0),   -- por 1 lote
   min_lot         numeric(10,4) check (min_lot > 0),
   lot_step        numeric(10,4) check (lot_step > 0),

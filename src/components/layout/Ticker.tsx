@@ -7,6 +7,8 @@ const DEFAULT_ITEMS = [
   'Pausa tras pérdida',
   'Hora de desconexión',
   'Revisión semanal',
+  'Copiloto 24 h',
+  'Cualquier mercado',
   'Sueño y rutina',
   'Sin señales',
 ]

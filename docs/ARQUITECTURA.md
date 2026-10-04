@@ -94,7 +94,7 @@ El SQL completo está en `supabase/migrations/0001_init.sql`. Validado en Postgr
 | `protocols` | `user_id NULL` = plantilla editable por admin; con `user_id` = protocolo del usuario (copiado de plantilla o propio). Categorías de trading **y de vida**: sueño, rutina, comida, ejercicio, pausas, desconexión |
 | `trading_plans`, `plan_versions` | Un plan por usuario con historial de versiones (`source`: ai / user / review). `inputs` = reglas que dio el usuario; `max_risk_pct` = límite que usa la calculadora |
 | `calendar_blocks` | Hora libre, duración, tipo, días de repetición, contenido flexible (Backtesting / Formación / Análisis), `is_screen` para el aviso de horas de pantalla |
-| `assets`, `account_settings` | Activos por usuario (preset US100 / GER40 / personalizado) con valor por punto, lote mínimo y paso **introducidos por el usuario** |
+| `assets`, `account_settings` | Mercados del usuario (cualquiera: catálogo o propio) con valor por punto/pip, lote mínimo y paso **introducidos por el usuario** |
 | `checklist_items`, `checklist_runs` | Checklist pre-operación y su historial |
 | `journal_entries` | Todos los campos pedidos + tipo `skipped` (no realizada) con motivo. Restricciones: una operación exige dirección, R y cumplimiento; una no realizada exige motivo |
 | `journal_summary` (vista) | nº operaciones, cumplimiento %, R acumulado, % ganadoras, R medio, nº no realizadas. `security_invoker` → respeta RLS |
@@ -132,7 +132,7 @@ lotes      = floor(lotes_raw / paso) × paso        ← siempre hacia abajo
 avisos:    lotes < lote_mínimo     → "no alcanza el lote mínimo"
            riesgo_% > max_risk_pct → "supera el límite de tu plan"
 ```
-- Los presets US100 / GER40 **solo rellenan el nombre**; los valores de contrato los mete el usuario y se guardan en `assets`.
+- **Cualquier mercado.** La interfaz ofrece un catálogo buscable (índices, forex, materias primas, cripto, acciones, futuros) y permite añadir uno propio. El catálogo **solo rellena el nombre**; valor por punto/pip, lote mínimo y paso los mete el usuario y se guardan por mercado en `assets`.
 - **Confirmado:** el "límite del plan" es el `max_risk_pct` que cada usuario fija en su propio plan. La calculadora usa solo los datos que él introduce.
 - La vista previa (`design/preview.html`) ya incluye esta lógica funcionando.
 
@@ -176,7 +176,7 @@ Me pediste un color más adecuado al trading. Mantengo la **estructura** de Goto
 
 **Componentes:** tarjetas radio 28 px, botones 14 px, píldoras, listas con flecha verde, cabecera fija con desenfoque al hacer scroll, menú hamburguesa a pantalla completa con animación escalonada, cinta en bucle (`translateX(-50%)`, contenido duplicado, pausa al pasar el ratón).
 
-**Franja de cifras reales** (sin valoraciones ni estadísticas inventadas): 6 preguntas · 1 plan versionado · 0 señales · 3 activos en la calculadora.
+**Franja de cifras reales** (sin valoraciones ni estadísticas inventadas): 6 preguntas · 1 plan versionado · 0 señales · copiloto 24 h.
 
 Si prefieres mantener el morado `#9b83f2` del brief para los detalles, es cambiar un token.
 

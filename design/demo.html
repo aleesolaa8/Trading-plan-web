@@ -1,0 +1,661 @@
+<title>Time to Trade Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+/* Concepto: la app real en el móvil. Barra inferior con 4 secciones, una tarjeta protagonista por pantalla.
+   Paleta Terminal: oscuro por defecto; claro solo si el visor lo elige. */
+:root{
+  --bg:#05070a;--bg-2:#080c11;--card:#0d1218;--card-2:#121922;--line:#1d2631;--line-2:#2a3542;
+  --text:#eef2f6;--muted:#8a95a3;
+  --green:#1fe08c;--green-ink:#03160c;--green-soft:rgba(31,224,140,.12);
+  --grad:linear-gradient(135deg,#12d27f 0%,#6ceaa9 50%,#d2f8c4 100%);--grad-text:var(--grad);
+  --blue:#4d8dff;--blue-soft:rgba(77,141,255,.12);
+  --red:#ff5468;--red-soft:rgba(255,84,104,.12);
+  --amber:#ffb547;--amber-soft:rgba(255,181,71,.12);
+  --glow:0 0 0 1px rgba(31,224,140,.55),0 12px 44px -10px rgba(31,224,140,.75);
+  --grid:rgba(255,255,255,.035);--halo:rgba(31,224,140,.14);
+  --font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r-card:28px;--r-btn:14px;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f5f7f6;--bg-2:#eef2f0;--card:#ffffff;--card-2:#f3f6f5;--line:#e1e7e4;--line-2:#cdd6d2;
+  --text:#0a1015;--muted:#56616b;
+  --green:#08995a;--green-soft:rgba(8,153,90,.10);
+  --grad-text:linear-gradient(135deg,#067a48 0%,#0aa862 55%,#21c27a 100%);
+  --blue:#2f6fe8;--blue-soft:rgba(47,111,232,.10);
+  --red:#d92f45;--red-soft:rgba(217,47,69,.08);
+  --amber:#b86e00;--amber-soft:rgba(184,110,0,.10);
+  --glow:0 0 0 1px rgba(8,153,90,.35),0 12px 34px -12px rgba(8,153,90,.55);
+  --grid:rgba(10,16,21,.05);--halo:rgba(8,153,90,.10);
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--text);font:16px/1.6 var(--font);-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(800px 460px at 80% -10%,var(--halo),transparent 60%),
+  linear-gradient(var(--grid) 1px,transparent 1px) 0 0/56px 56px,linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/56px 56px;
+  -webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:6px}
+.hl{color:var(--green)}
+.hl-grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.muted{color:var(--muted)}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.dot{width:8px;height:8px;flex:none;border-radius:50%;background:var(--blue);box-shadow:0 0 12px var(--blue)}
+h1,h2,h3{font-weight:900;letter-spacing:-.04em;line-height:1;text-wrap:balance}
+h1{font-size:clamp(34px,7vw,52px)}
+h2{font-size:clamp(24px,4.4vw,32px);letter-spacing:-.035em;line-height:1.08}
+h3{font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+
+/* Estructura */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;gap:12px;height:64px;padding-inline:16px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:-.04em;font-size:19px;white-space:nowrap;margin-right:auto}
+.mark{width:32px;height:32px;border-radius:10px;background:var(--grad);display:grid;place-items:center;color:var(--green-ink)}
+.badge{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue)}
+.tabs-top{display:none;gap:6px}
+.tab{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;font-weight:600;color:var(--muted);font-size:15px;transition:color .2s,background .2s}
+.tab:hover{color:var(--text)}
+.tab[aria-current="page"]{color:var(--green);background:var(--green-soft)}
+.bottom{position:fixed;inset:auto 0 0;z-index:20;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.bottom .tab{flex-direction:column;gap:3px;padding:8px 2px;font-size:11.5px;justify-content:center}
+main{width:min(880px,100%);margin-inline:auto;padding:28px 16px 120px}
+@media(min-width:860px){.tabs-top{display:flex}.bottom{display:none}main{padding:44px 24px 80px}}
+.view{display:grid;gap:18px}
+.view[hidden]{display:none}
+.head{display:grid;gap:12px;margin-bottom:6px}
+.lead{color:var(--muted);font-size:17px;max-width:60ch}
+
+/* Piezas */
+.card{border-radius:var(--r-card);border:1px solid var(--line);background:linear-gradient(180deg,var(--card-2),var(--card));padding:24px;display:grid;gap:16px;min-width:0}
+@media(min-width:600px){.card{padding:30px}}
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:0 24px;border-radius:var(--r-btn);font-weight:800;font-size:16px;white-space:nowrap;isolation:isolate;overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .2s,color .2s}
+.btn .arr{transition:transform .25s}
+.btn:hover .arr{transform:translateX(5px)}
+.btn-primary{background:var(--grad);color:var(--green-ink);box-shadow:var(--glow)}
+.btn-primary::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.75) 50%,transparent 70%);transform:translateX(-120%);animation:shine 3.8s ease-in-out infinite}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px)}
+.btn-ghost{border:1px solid var(--line-2);background:var(--card)}
+.btn-ghost:hover:not(:disabled){border-color:var(--green);color:var(--green)}
+.btn-sm{min-height:42px;padding:0 16px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.row>.btn{flex:1 1 200px}
+@keyframes shine{0%,55%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
+.chip{display:inline-flex;width:fit-content;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:999px;background:var(--green-soft);color:var(--green)}
+.chip.blue{background:var(--blue-soft);color:var(--blue)}.chip.amber{background:var(--amber-soft);color:var(--amber)}
+ul.arrows{list-style:none;display:grid;gap:10px}
+ul.arrows li{position:relative;padding-left:28px}
+ul.arrows li::before{content:"→";position:absolute;left:0;color:var(--green);font-weight:900}
+
+/* Formularios */
+.field{display:grid;gap:7px;min-width:0}
+.label{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.input{width:100%;min-width:0;min-height:50px;padding:0 14px;border-radius:14px;border:1px solid var(--line-2);background:var(--bg-2);font-weight:600;font-size:16px;transition:border-color .2s,box-shadow .2s}
+textarea.input{min-height:96px;padding:12px 14px;resize:vertical;line-height:1.5}
+.input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+.input::placeholder{color:var(--muted);font-weight:400}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.full{grid-column:1/-1}
+.hint{font-size:13px;color:var(--muted)}
+
+/* Diagnóstico */
+.progress{display:flex;gap:6px}
+.progress i{height:4px;flex:1;border-radius:4px;background:var(--line-2);transition:background .3s}
+.progress i.on{background:var(--green)}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;padding:15px 16px;border-radius:16px;border:1px solid var(--line-2);background:var(--bg-2);font-weight:600;display:flex;align-items:center;gap:14px;transition:border-color .2s,background .2s,transform .15s}
+.opt:hover{border-color:var(--green);transform:translateX(3px)}
+.opt .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);flex:none;transition:all .2s}
+.opt[aria-pressed="true"]{border-color:var(--green);background:var(--green-soft)}
+.opt[aria-pressed="true"] .radio{border-color:var(--green);background:var(--green);box-shadow:inset 0 0 0 3px var(--bg-2)}
+.tip{border-radius:20px;padding:18px 20px;border:1px solid;display:grid;gap:6px}
+.tip h4{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.tip.why{background:var(--blue-soft);border-color:color-mix(in srgb,var(--blue) 35%,transparent)}.tip.why h4{color:var(--blue)}
+.tip.plan{background:var(--green-soft);border-color:color-mix(in srgb,var(--green) 35%,transparent)}.tip.plan h4{color:var(--green)}
+.proto-line{display:flex;align-items:center;gap:12px;border:1px dashed var(--line-2);border-radius:16px;padding:12px 14px;font-size:14px}
+.proto-line b{display:block}
+
+/* Selector de mercados */
+.search{position:relative}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search .input{padding-left:42px}
+.cats{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex:none;padding:8px 14px;border-radius:999px;border:1px solid var(--line-2);font-size:14px;font-weight:600;color:var(--muted)}
+.cat[aria-pressed="true"]{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+.mkts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;max-height:300px;overflow-y:auto;padding:2px}
+.mkt{text-align:left;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--bg-2);display:grid;gap:1px;transition:border-color .2s}
+.mkt b{font-size:15px}
+.mkt span{font-size:12px;color:var(--muted)}
+.mkt:hover{border-color:var(--line-2)}
+.mkt[aria-pressed="true"]{border-color:var(--green);background:var(--green-soft)}
+.mkt[aria-pressed="true"] b{color:var(--green)}
+.picked{display:flex;flex-wrap:wrap;gap:8px}
+.pk{display:inline-flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border-radius:999px;background:var(--green-soft);color:var(--green);font-weight:700;font-size:14px}
+.pk button{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:var(--green);font-weight:900}
+.pk button:hover{background:var(--green);color:var(--green-ink)}
+
+/* Plan */
+.doc-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.sec{display:grid;gap:12px;padding-top:18px;border-top:1px solid var(--line)}
+.sec:first-of-type{border-top:0;padding-top:0}
+.sec-n{font-size:12px;font-weight:900;letter-spacing:.14em;color:var(--green)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kv div{border-radius:16px;background:var(--bg-2);border:1px solid var(--line);padding:12px 14px;min-width:0}
+.kv span{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.kv b{font-size:20px;font-weight:900;letter-spacing:-.03em;overflow-wrap:anywhere}
+.quote{border-left:3px solid var(--green);padding:4px 0 4px 14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.day{display:grid;gap:8px}
+.slot{display:grid;grid-template-columns:62px minmax(0,1fr);gap:12px;align-items:center}
+.slot time{font-weight:800;font-size:14px;color:var(--muted)}
+.blk{border-radius:12px;padding:9px 12px;font-weight:700;font-size:14px;border-left:3px solid}
+.blk.trade{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.blk.life{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+.blk.study{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+.blk.off{background:var(--card-2);border-color:var(--line-2);color:var(--muted)}
+.protos{display:grid;gap:10px}
+.proto{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:start;border-radius:18px;border:1px solid var(--line);background:var(--bg-2);padding:14px 16px}
+.proto.off{opacity:.5}
+.proto small{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+.proto p{grid-column:1/-1;font-size:15px;color:var(--muted)}
+.switch{width:46px;height:28px;border-radius:999px;background:var(--line-2);position:relative;transition:background .2s;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--green)}
+.switch[aria-checked="true"]::after{transform:translateX(18px)}
+.checklist{list-style:none;display:grid;gap:8px}
+.checklist label{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg-2);cursor:pointer}
+.checklist input{width:20px;height:20px;flex:none;margin-top:2px;accent-color:var(--green)}
+.empty{text-align:center;justify-items:center;padding:40px 24px}
+
+/* Calculadora */
+.result{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;border-radius:18px;padding:16px 18px;background:var(--green-soft);border:1px solid color-mix(in srgb,var(--green) 40%,transparent)}
+.result small{display:block;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.result strong{font-size:42px;font-weight:900;letter-spacing:-.05em;line-height:1;color:var(--green)}
+.warn{font-size:14px;padding:11px 14px;border-radius:12px;background:var(--amber-soft);color:var(--amber);font-weight:600}
+.warn.red{background:var(--red-soft);color:var(--red)}
+
+/* Copiloto */
+.chat{display:flex;flex-direction:column;gap:14px;min-height:300px}
+.msgs{display:flex;flex-direction:column;gap:12px}
+.msg{max-width:88%;padding:13px 16px;border-radius:20px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15.5px;line-height:1.55}
+.msg.me{align-self:flex-end;background:var(--grad);color:var(--green-ink);border-bottom-right-radius:6px;font-weight:600}
+.msg.ai{align-self:flex-start;background:var(--card-2);border:1px solid var(--line);border-bottom-left-radius:6px}
+.msg.ai.thinking{color:var(--muted)}
+.msg.ai.thinking::after{content:"";display:inline-block;width:1.2em;text-align:left;animation:dots 1.2s steps(4,end) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+.who{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--green);display:block;margin-bottom:4px}
+.quick{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.quick::-webkit-scrollbar{display:none}
+.quick button{flex:none;padding:9px 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);font-size:14px;font-weight:600}
+.quick button:hover{border-color:var(--green);color:var(--green)}
+.composer{display:flex;gap:8px;align-items:flex-end}
+.composer textarea{flex:1;min-height:52px;max-height:160px}
+.composer .btn{flex:none;min-height:52px;padding:0 18px}
+.crisis{border-radius:18px;padding:16px 18px;background:var(--red-soft);border:1px solid color-mix(in srgb,var(--red) 35%,transparent);display:grid;gap:6px}
+.crisis b{color:var(--red)}
+.crisis .tel{font-size:22px;font-weight:900;letter-spacing:-.02em;user-select:all}
+.note{font-size:12.5px;color:var(--muted);text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;padding:12px 18px;border-radius:14px;background:var(--text);color:var(--bg);font-weight:700;font-size:14px;box-shadow:0 12px 40px -10px rgba(0,0,0,.6)}
+footer{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:18px;margin-top:10px}
+
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="logo"><span class="mark" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 18 18"><rect x="2" y="7" width="3.2" height="7" rx="1" fill="currentColor"/><rect x="7.4" y="3" width="3.2" height="9" rx="1" fill="currentColor"/><rect x="12.8" y="1" width="3.2" height="7" rx="1" fill="currentColor"/></svg></span>Time to <span class="hl">Trade</span></div>
+  <nav class="tabs-top" aria-label="Secciones" data-nav></nav>
+  <span class="badge">Demo</span>
+</header>
+
+<main id="app">
+  <!-- 1. DIAGNÓSTICO -->
+  <section class="view" id="v-diag" aria-labelledby="t-diag"></section>
+  <!-- 2. MI PLAN -->
+  <section class="view" id="v-plan" hidden></section>
+  <!-- 3. CALCULADORA -->
+  <section class="view" id="v-calc" hidden></section>
+  <!-- 4. COPILOTO -->
+  <section class="view" id="v-chat" hidden></section>
+
+  <footer>Time to Trade es una herramienta de planificación y registro. No es asesoramiento financiero ni psicológico y nunca te dirá qué comprar o vender. Los CFD son instrumentos complejos y conllevan un riesgo elevado de perder dinero rápidamente debido al apalancamiento. En esta demo, tus datos se quedan solo en este navegador.</footer>
+</main>
+
+<nav class="bottom" aria-label="Secciones" data-nav></nav>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+/* ============================================================
+   CONTENIDO (en la app real vive en la base de datos, editable)
+   ============================================================ */
+const PROTOS={
+  ventana_fija:{cat:'Rutina',title:'Ventana fija de mercado',trigger:'Cada día de trading',body:'Opero solo dentro de mi horario del plan. Fuera de él, el gráfico se cierra.'},
+  sesion_corta:{cat:'Rutina',title:'Sesión corta y enfocada',trigger:'Si tengo menos de una hora',body:'Preparo el análisis la noche anterior y uso la sesión solo para ejecutar lo que ya estaba escrito.'},
+  riesgo_fijo:{cat:'Riesgo',title:'Riesgo fijo por operación',trigger:'Antes de cada entrada',body:'Calculo el tamaño con la calculadora. Nunca arriesgo más del límite escrito en mi plan.'},
+  riesgo_definir:{cat:'Riesgo',title:'Definir el riesgo antes de operar',trigger:'Hasta tenerlo escrito',body:'No abro operaciones reales hasta haber fijado un % de riesgo por operación en mi plan.'},
+  pausa_20:{cat:'Emociones',title:'Pausa de 20 minutos tras una pérdida',trigger:'Después de cerrar en pérdida',body:'Me levanto, bebo agua y no miro el gráfico durante 20 minutos. Luego repaso el checklist antes de volver.'},
+  stop_diario:{cat:'Riesgo',title:'Límite de pérdida diaria',trigger:'Al llegar a mi pérdida diaria máxima',body:'Cierro la plataforma por hoy. Mañana es otra sesión con la cabeza limpia.'},
+  no_mover_sl:{cat:'Trading',title:'El stop no se toca en contra',trigger:'Con la operación abierta',body:'El stop loss solo se mueve a favor y solo según la regla escrita en mi plan.'},
+  gestion_escrita:{cat:'Trading',title:'Gestión escrita de antemano',trigger:'Antes de entrar',body:'Escribo dónde tomo beneficio y cuándo muevo a break-even. Durante la operación solo ejecuto.'},
+  sin_setup_fuera:{cat:'Trading',title:'Sin setup, no hay operación',trigger:'Cuando el mercado no da mi entrada',body:'Lo apunto como "no realizada" en el journal y dedico el tiempo a backtesting o formación.'},
+  desconexion_hora:{cat:'Desconexión',title:'Hora fija de desconexión',trigger:'A la hora marcada en el calendario',body:'Cierro plataformas y notificaciones. El día de trading termina aquí, haya ido como haya ido.'},
+  energia_check:{cat:'Sueño',title:'Chequeo de energía antes de operar',trigger:'Al empezar la sesión',body:'Si he dormido mal o estoy agotado, reduzco el riesgo a la mitad o hago solo análisis.'},
+  rutina_sueno:{cat:'Sueño',title:'Rutina de sueño estable',trigger:'Cada noche',body:'Me acuesto a una hora parecida y dejo las pantallas 30 minutos antes.'},
+  movimiento_diario:{cat:'Ejercicio',title:'Moverme antes de la pantalla',trigger:'Antes de la sesión',body:'Un paseo o 15 minutos de ejercicio suave antes de sentarme a operar.'},
+};
+const QUESTIONS=[
+ {id:'tiempo',eyebrow:'Tiempo',prompt:'¿Cuánto tiempo real tienes al día para el trading?',helper:'Cuenta el tiempo que puedes dedicar sin quitárselo al descanso ni a tu gente.',opts:[
+  {id:'menos_1h',label:'Menos de 1 hora',why:'Con poco tiempo es normal querer aprovecharlo al máximo y forzar entradas para "no perder el día".',plan:'Tu plan concentra el análisis la noche anterior y deja la sesión solo para ejecutar. Menos tiempo, más claridad.',p:'sesion_corta'},
+  {id:'1_2h',label:'Entre 1 y 2 horas',why:'Es un margen cómodo, pero sin límites claros una hora se convierte en tres sin darte cuenta.',plan:'Tu calendario marca una ventana fija de mercado y una hora de cierre que no depende del resultado.',p:'ventana_fija'},
+  {id:'mas_2h',label:'Más de 2 horas',why:'Mucho tiempo delante del gráfico puede hacer que veas oportunidades donde solo hay ruido.',plan:'Tu plan divide la sesión: ejecución en tu ventana y el resto para backtesting, formación o análisis.',p:'ventana_fija'}]},
+ {id:'riesgo',eyebrow:'Riesgo',prompt:'¿Cuánto arriesgas hoy en cada operación?',helper:'No hay respuesta buena o mala: es el punto de partida.',opts:[
+  {id:'fijo_bajo',label:'Un % fijo, 1 % o menos',why:'Tener un número fijo ya es una base sólida: libera la cabeza para ejecutar.',plan:'Tu plan lo deja por escrito y la calculadora te da el tamaño exacto en cada operación.',p:'riesgo_fijo'},
+  {id:'fijo_alto',label:'Un % fijo, más del 1 %',why:'Cuando quieres crecer rápido, subir el riesgo parece el atajo. Suele hacer las rachas malas más pesadas.',plan:'Tu plan fija un límite y la calculadora te avisa si lo superas. Tú decides el número; el plan lo protege.',p:'riesgo_fijo'},
+  {id:'variable',label:'Depende de cómo lo vea',why:'Ajustar el riesgo según la convicción es muy humano, pero la convicción cambia con el humor del día.',plan:'Tu plan propone un % fijo que eliges tú. La calculadora hace el resto para que no dependa del momento.',p:'riesgo_fijo'},
+  {id:'no_se',label:'No lo tengo claro',why:'Muchas personas empiezan mirando el gráfico antes que el riesgo. Es el orden habitual, no un fallo.',plan:'El primer paso de tu plan es definir tu % por operación antes de cualquier operación real.',p:'riesgo_definir'}]},
+ {id:'perdida',eyebrow:'Emociones',prompt:'¿Qué sueles hacer justo después de una pérdida?',helper:'Piensa en lo que haces de verdad, no en lo que te gustaría hacer.',opts:[
+  {id:'recuperar',label:'Busco recuperarla rápido',why:'Perder activa las ganas de "arreglarlo" cuanto antes. Es una reacción muy común, no un defecto.',plan:'Tu plan incluye una pausa de 20 minutos tras cada pérdida y repasar el checklist antes de volver.',p:'pausa_20'},
+  {id:'subo',label:'Subo el tamaño en la siguiente',why:'Después de perder, la siguiente operación puede sentirse como la que lo compensa todo.',plan:'Tu plan fija un riesgo que no cambia tras una pérdida y un límite de pérdida diaria para cerrar la sesión.',p:'stop_diario'},
+  {id:'paro',label:'Paro y lo reviso',why:'Saber parar es una de las habilidades más valiosas. Merece estar por escrito para los días difíciles.',plan:'Tu plan convierte esa pausa en un protocolo fijo, para que no dependa de cómo te sientas ese día.',p:'pausa_20'},
+  {id:'sigo',label:'Sigo como si nada',why:'Seguir con calma está bien, siempre que la siguiente entrada venga del plan y no de la inercia.',plan:'Tu plan añade un límite de pérdida diaria para que el día tenga un final claro.',p:'stop_diario'}]},
+ {id:'favor',eyebrow:'Gestión',prompt:'¿Qué haces cuando una operación va a tu favor?',helper:'',opts:[
+  {id:'cierro',label:'Cierro pronto por miedo a que se gire',why:'Ver beneficio abierto genera tensión y cerrar alivia. Es humano querer asegurar.',plan:'Tu plan define de antemano dónde tomas beneficio, para que la decisión ya esté tomada antes de entrar.',p:'gestion_escrita'},
+  {id:'muevo',label:'Muevo el stop sin una regla clara',why:'Mover el stop da sensación de control, pero sin regla suele depender de los nervios del momento.',plan:'Tu plan incluye una regla: el stop solo se mueve a favor y según lo escrito.',p:'no_mover_sl'},
+  {id:'dejo',label:'La dejo correr según mi plan',why:'Dejar trabajar la operación requiere paciencia y confianza en lo que has preparado.',plan:'Tu plan lo refuerza dejando la gestión escrita para los días en que dudes.',p:'gestion_escrita'}]},
+ {id:'setup',eyebrow:'Paciencia',prompt:'¿Qué haces cuando el mercado no te da tu setup?',helper:'',opts:[
+  {id:'fuerzo',label:'Acabo entrando igualmente',why:'Después de preparar la sesión, no operar puede sentirse como tiempo perdido.',plan:'Tu plan cuenta "no operar" como una sesión cumplida: lo apuntas en el journal y pasas a backtesting.',p:'sin_setup_fuera'},
+  {id:'miro',label:'Me quedo mirando el gráfico',why:'Quedarse "por si acaso" es habitual. Con el tiempo, el cansancio empuja a entrar.',plan:'Tu calendario tiene una hora fija de desconexión. Si no hay setup, se cierra la plataforma.',p:'desconexion_hora'},
+  {id:'voy',label:'Cierro y hago otra cosa',why:'Saber irte es señal de que respetas tu proceso.',plan:'Tu plan lo deja como protocolo y te propone usar ese tiempo en formación o descanso.',p:'sin_setup_fuera'}]},
+ {id:'energia',eyebrow:'Energía',prompt:'¿Cómo suele estar tu energía los días que operas?',helper:'Sueño, comida y cansancio también operan contigo.',opts:[
+  {id:'bien',label:'Bien, con descanso',why:'Una buena base de descanso hace que todo lo demás sea más fácil.',plan:'Tu calendario protege lo que ya funciona: horas de sueño, comidas y movimiento como bloques fijos.',p:'rutina_sueno'},
+  {id:'variable',label:'Depende del día',why:'El trading suele convivir con trabajo, familia y otras cosas. Es lógico que la energía varíe.',plan:'Tu plan incluye un chequeo de energía al empezar: si estás bajo, menos riesgo o solo análisis.',p:'energia_check'},
+  {id:'cansado',label:'Suelo operar con cansancio',why:'Operar al final de un día largo es muy frecuente. El cansancio cambia cómo decidimos.',plan:'Tu calendario reserva descanso y movimiento antes de la sesión, y tu plan reduce el riesgo si llegas sin energía.',p:'movimiento_diario'}]},
+];
+/* Catálogo de mercados: solo nombres. Los valores de contrato los mete cada usuario (cambian por bróker). */
+const MARKETS=[
+ ['Índices','US100','Nasdaq 100'],['Índices','US500','S&P 500'],['Índices','US30','Dow Jones'],['Índices','US2000','Russell 2000'],['Índices','GER40','DAX'],['Índices','UK100','FTSE 100'],['Índices','FRA40','CAC 40'],['Índices','ESP35','IBEX 35'],['Índices','EU50','Euro Stoxx 50'],['Índices','JP225','Nikkei 225'],['Índices','HK50','Hang Seng'],['Índices','AUS200','ASX 200'],
+ ['Forex','EURUSD','Euro / Dólar'],['Forex','GBPUSD','Libra / Dólar'],['Forex','USDJPY','Dólar / Yen'],['Forex','USDCHF','Dólar / Franco'],['Forex','AUDUSD','Dólar australiano'],['Forex','USDCAD','Dólar / Dólar canadiense'],['Forex','NZDUSD','Dólar neozelandés'],['Forex','EURGBP','Euro / Libra'],['Forex','EURJPY','Euro / Yen'],['Forex','GBPJPY','Libra / Yen'],['Forex','EURCHF','Euro / Franco'],
+ ['Materias primas','XAUUSD','Oro'],['Materias primas','XAGUSD','Plata'],['Materias primas','WTI','Petróleo WTI'],['Materias primas','BRENT','Petróleo Brent'],['Materias primas','NATGAS','Gas natural'],['Materias primas','COPPER','Cobre'],
+ ['Cripto','BTCUSD','Bitcoin'],['Cripto','ETHUSD','Ethereum'],['Cripto','SOLUSD','Solana'],['Cripto','XRPUSD','XRP'],
+ ['Acciones','AAPL','Apple'],['Acciones','MSFT','Microsoft'],['Acciones','NVDA','Nvidia'],['Acciones','TSLA','Tesla'],['Acciones','AMZN','Amazon'],['Acciones','META','Meta'],['Acciones','GOOGL','Alphabet'],['Acciones','SAN','Banco Santander'],
+ ['Futuros','NQ','E-mini Nasdaq'],['Futuros','ES','E-mini S&P 500'],['Futuros','FDAX','Futuro DAX'],['Futuros','GC','Futuro oro'],['Futuros','CL','Futuro crudo'],
+];
+const CATS=['Todos','Índices','Forex','Materias primas','Cripto','Acciones','Futuros'];
+
+/* ============================================================
+   ESTADO (en la demo, solo en este navegador)
+   ============================================================ */
+const KEY='ttt-demo-v1';
+const fresh=()=>({view:'diag',qi:0,answers:{},stage:'quiz',rules:{name:'',markets:[],start:'15:30',end:'17:30',risk:'0.5',maxTrades:'2',maxLoss:'2',setup:'',management:''},planReady:false,planDate:null,protoOff:{},ownProtos:[],assets:{},calc:{balance:'',market:'',sl:''},chat:[]});
+let S=fresh();
+try{const raw=localStorage.getItem(KEY);if(raw)S={...fresh(),...JSON.parse(raw)}}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>parseFloat(String(v).replace(',','.'));
+const fmt=(n,d=2)=>n.toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2400)}
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+const NAV=[
+ ['diag','Diagnóstico','<path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>'],
+ ['plan','Mi plan','<path d="M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6"/>'],
+ ['calc','Calculadora','<path d="M6 3h12v18H6zM9 7h6M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/>'],
+ ['chat','Copiloto','<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/>'],
+];
+function renderNav(){
+  document.querySelectorAll('[data-nav]').forEach(n=>{
+    n.innerHTML=NAV.map(([id,label,icon])=>`<button class="tab" data-go="${id}" ${S.view===id?'aria-current="page"':''}><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon}</svg><span>${label}</span></button>`).join('');
+  });
+}
+function go(view){S.view=view;save();render();window.scrollTo({top:0});if(view==='chat')setTimeout(()=>$('#c-input')?.focus({preventScroll:true}),50)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
+
+/* ============================================================
+   1. DIAGNÓSTICO + TUS REGLAS
+   ============================================================ */
+function renderDiag(){
+  const v=$('#v-diag');
+  if(S.stage==='rules'){v.innerHTML=rulesHTML();bindRules();return}
+  const q=QUESTIONS[S.qi],a=S.answers[q.id],opt=q.opts.find(o=>o.id===a);
+  v.innerHTML=`
+  <div class="head"><span class="eyebrow"><span class="dot"></span>Diagnóstico · Pregunta ${S.qi+1} de 6</span>
+  <h1 id="t-diag">Construimos tu plan <span class="hl-grad">contigo</span>.</h1></div>
+  <div class="card">
+    <div class="progress" aria-hidden="true">${QUESTIONS.map((_,i)=>`<i class="${i<=S.qi?'on':''}"></i>`).join('')}</div>
+    <span class="eyebrow">${esc(q.eyebrow)}</span>
+    <h2 id="q-title">${esc(q.prompt)}</h2>
+    ${q.helper?`<p class="muted">${esc(q.helper)}</p>`:''}
+    <div class="opts" role="group" aria-labelledby="q-title">${q.opts.map(o=>`<button class="opt" data-opt="${o.id}" aria-pressed="${o.id===a}"><span class="radio"></span>${esc(o.label)}</button>`).join('')}</div>
+  </div>
+  ${opt?`<div class="card" aria-live="polite">
+    <div class="tip why"><h4>Por qué puede pasar</h4><p>${esc(opt.why)}</p></div>
+    <div class="tip plan"><h4>Cómo lo trabaja tu plan</h4><p>${esc(opt.plan)}</p></div>
+    <div class="proto-line"><span class="chip blue">Protocolo</span><div><b>${esc(PROTOS[opt.p].title)}</b><span class="muted">Se añade a tu plan. Podrás editarlo o crear los tuyos.</span></div></div>
+  </div>`:''}
+  <div class="row">
+    ${S.qi>0?'<button class="btn btn-ghost" data-act="prev">← Anterior</button>':''}
+    <button class="btn btn-primary" data-act="next" ${opt?'':'disabled'}>${S.qi<5?'Siguiente':'Ahora, tus reglas'} <span class="arr">→</span></button>
+  </div>`;
+  v.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>{S.answers[q.id]=b.dataset.opt;save();renderDiag()});
+  v.querySelector('[data-act=next]').onclick=()=>{if(S.qi<5)S.qi++;else S.stage='rules';save();renderDiag();window.scrollTo({top:0})};
+  v.querySelector('[data-act=prev]')?.addEventListener('click',()=>{S.qi--;save();renderDiag()});
+}
+
+let catSel='Todos',mktQuery='';
+function rulesHTML(){
+  const r=S.rules;
+  return `
+  <div class="head"><span class="eyebrow"><span class="dot"></span>Paso final · Tus reglas</span>
+  <h1>Tu plan lleva <span class="hl-grad">tus reglas</span>.</h1>
+  <p class="lead">No inventamos estrategias. Escribe cómo operas tú y lo convertimos en un plan claro.</p></div>
+
+  <div class="card">
+    <h2>¿Qué mercados operas?</h2>
+    <p class="muted">Elige todos los que quieras. Si el tuyo no está, añádelo con su nombre.</p>
+    <div class="picked" id="picked">${pickedHTML()}</div>
+    <div class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <label class="sr" for="m-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar mercado</label>
+      <input class="input" id="m-q" placeholder="Busca: oro, EURUSD, Nasdaq, Bitcoin…" value="${esc(mktQuery)}" autocomplete="off"></div>
+    <div class="cats" role="group" aria-label="Tipo de mercado">${CATS.map(c=>`<button class="cat" data-cat="${c}" aria-pressed="${c===catSel}">${c}</button>`).join('')}</div>
+    <div class="mkts" id="mkts">${mktsHTML()}</div>
+    <div class="grid2" style="grid-template-columns:minmax(0,1fr) auto;align-items:end">
+      <label class="field"><span class="label">Otro mercado</span><input class="input" id="m-own" placeholder="Ej.: Café, USDMXN, Inditex" maxlength="30"></label>
+      <button class="btn btn-ghost btn-sm" id="m-add" style="min-height:50px">Añadir</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Horario y riesgo</h2>
+    <div class="grid2">
+      <label class="field full"><span class="label">Tu nombre</span><input class="input" id="r-name" value="${esc(r.name)}" placeholder="Cómo quieres que te llame" maxlength="40" autocomplete="given-name"></label>
+      <label class="field"><span class="label">Empiezo a operar</span><input class="input" id="r-start" type="time" value="${esc(r.start)}"></label>
+      <label class="field"><span class="label">Termino</span><input class="input" id="r-end" type="time" value="${esc(r.end)}"></label>
+      <label class="field"><span class="label">Riesgo por operación (%)</span><input class="input" id="r-risk" inputmode="decimal" value="${esc(r.risk)}"></label>
+      <label class="field"><span class="label">Máx. operaciones al día</span><input class="input" id="r-trades" inputmode="numeric" value="${esc(r.maxTrades)}"></label>
+      <label class="field full"><span class="label">Pérdida máxima al día (en R)</span><input class="input" id="r-loss" inputmode="decimal" value="${esc(r.maxLoss)}"><span class="hint">1 R = lo que arriesgas en una operación. Con 2 R, paras tras perder dos operaciones completas.</span></label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Tu forma de operar</h2>
+    <label class="field"><span class="label">Tu setup: cuándo entras</span><textarea class="input" id="r-setup" maxlength="600" placeholder="Con tus palabras. Ej.: Espero ruptura del máximo de la primera hora y entro en el retesteo con vela de confirmación.">${esc(r.setup)}</textarea></label>
+    <label class="field"><span class="label">Tu gestión: stop y salida</span><textarea class="input" id="r-mgmt" maxlength="600" placeholder="Ej.: Stop bajo el último mínimo. Objetivo 2 R. Muevo a break-even al llegar a 1 R.">${esc(r.management)}</textarea></label>
+    <p class="hint">Si lo dejas vacío, tu plan lo marcará como pendiente. Nunca lo rellenamos por ti.</p>
+  </div>
+  <div id="r-err" role="alert"></div>
+  <div class="row">
+    <button class="btn btn-ghost" id="r-back">← Volver al diagnóstico</button>
+    <button class="btn btn-primary" id="r-go">Crear mi plan <span class="arr">→</span></button>
+  </div>`;
+}
+function pickedHTML(){return S.rules.markets.length?S.rules.markets.map(m=>`<span class="pk">${esc(m)}<button aria-label="Quitar ${esc(m)}" data-rm="${esc(m)}">×</button></span>`).join(''):'<span class="hint">Aún no has elegido ninguno.</span>'}
+function mktsHTML(){
+  const q=mktQuery.trim().toLowerCase();
+  const list=MARKETS.filter(([c,s,n])=>(catSel==='Todos'||c===catSel)&&(!q||s.toLowerCase().includes(q)||n.toLowerCase().includes(q)));
+  if(!list.length)return `<p class="hint" style="grid-column:1/-1">No está en la lista. Añádelo abajo en "Otro mercado".</p>`;
+  return list.map(([c,s,n])=>`<button class="mkt" data-m="${s}" aria-pressed="${S.rules.markets.includes(s)}"><b>${s}</b><span>${esc(n)}</span></button>`).join('');
+}
+function refreshMarkets(){$('#picked').innerHTML=pickedHTML();$('#mkts').innerHTML=mktsHTML()}
+function bindRules(){
+  const v=$('#v-diag');
+  v.onclick=rulesClicks;
+  $('#m-q').oninput=e=>{mktQuery=e.target.value;$('#mkts').innerHTML=mktsHTML()};
+  const add=()=>{const val=$('#m-own').value.trim().toUpperCase().slice(0,30);if(!val)return;if(!S.rules.markets.includes(val))S.rules.markets.push(val);$('#m-own').value='';save();refreshMarkets();toast(val+' añadido')};
+  $('#m-add').onclick=add;$('#m-own').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add()}};
+  const bind=(id,k)=>$(id).oninput=e=>{S.rules[k]=e.target.value;save()};
+  bind('#r-name','name');bind('#r-start','start');bind('#r-end','end');bind('#r-risk','risk');bind('#r-trades','maxTrades');bind('#r-loss','maxLoss');bind('#r-setup','setup');bind('#r-mgmt','management');
+  $('#r-back').onclick=()=>{S.stage='quiz';S.qi=5;save();renderDiag()};
+  $('#r-go').onclick=()=>{
+    const r=S.rules,err=[];
+    if(!r.markets.length)err.push('Elige al menos un mercado.');
+    const risk=num(r.risk);if(!(risk>0&&risk<=10))err.push('El riesgo por operación debe estar entre 0,01 % y 10 %.');
+    if(!(parseInt(r.maxTrades)>0))err.push('Indica cuántas operaciones como máximo al día (1 o más).');
+    if(!(num(r.maxLoss)>0))err.push('Indica tu pérdida máxima diaria en R (por ejemplo, 2).');
+    if(!r.start||!r.end)err.push('Indica tu horario de inicio y fin.');
+    if(err.length){$('#r-err').innerHTML=err.map(t=>`<p class="warn red">${t}</p>`).join('');$('#r-err').scrollIntoView({block:'center'});return}
+    S.planReady=true;S.planDate=new Date().toISOString();S.calc.market=S.calc.market||r.markets[0];save();go('plan');toast('Plan creado');
+  };
+}
+function rulesClicks(e){
+  const c=e.target.closest('[data-cat]');if(c){catSel=c.dataset.cat;$('.cats').innerHTML=CATS.map(x=>`<button class="cat" data-cat="${x}" aria-pressed="${x===catSel}">${x}</button>`).join('');$('#mkts').innerHTML=mktsHTML();return}
+  const m=e.target.closest('[data-m]');if(m){const s=m.dataset.m,i=S.rules.markets.indexOf(s);i<0?S.rules.markets.push(s):S.rules.markets.splice(i,1);save();refreshMarkets();return}
+  const rm=e.target.closest('[data-rm]');if(rm){S.rules.markets=S.rules.markets.filter(x=>x!==rm.dataset.rm);save();refreshMarkets()}
+}
+
+/* ============================================================
+   2. MI PLAN
+   ============================================================ */
+const toMin=t=>{const[h,m]=String(t).split(':').map(Number);return(h||0)*60+(m||0)};
+const toHHMM=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
+function planProtos(){
+  const slugs=[...new Set(QUESTIONS.map(q=>q.opts.find(o=>o.id===S.answers[q.id])?.p).filter(Boolean))];
+  return [...slugs.map(s=>({id:s,...PROTOS[s]})),...S.ownProtos.map(p=>({...p,cat:'Propio',own:true}))];
+}
+function daySlots(){
+  const a=S.answers,start=toMin(S.rules.start),end=toMin(S.rules.end),s=[];
+  if(a.energia==='cansado'||a.energia==='variable')s.push([start-150,'life','Movimiento: paseo o ejercicio suave (15–30 min)']);
+  s.push([start-120,'life','Comida tranquila, lejos del gráfico']);
+  if(a.tiempo==='menos_1h')s.push([start-15,'study','Repaso del análisis preparado la noche anterior']);
+  else s.push([start-45,'study','Análisis y checklist pre-sesión']);
+  s.push([start,'trade','Sesión de trading · '+S.rules.markets.slice(0,3).join(', ')+(S.rules.markets.length>3?'…':'')]);
+  s.push([end,'off','Desconexión: plataforma cerrada']);
+  if(a.tiempo==='mas_2h')s.push([end+30,'study','Backtesting o formación (opcional)']);
+  if(a.tiempo==='menos_1h')s.push([22*60,'study','Análisis para mañana (20 min)']);
+  s.push([23*60,'life','Pantallas fuera · rutina de sueño']);
+  return s.sort((x,y)=>((x[0]+1440)%1440)-((y[0]+1440)%1440));
+}
+function checklistItems(){
+  const r=S.rules;
+  return [`Estoy dentro de mi horario (${r.start}–${r.end})`,'El setup cumple exactamente lo que tengo escrito',`He calculado el tamaño con un riesgo de ${r.risk} % o menos`,`Llevo menos de ${r.maxTrades} operaciones hoy`,`No he llegado a mi pérdida máxima del día (−${r.maxLoss} R)`,'Mi energía está bien. Si no, mitad de riesgo o solo análisis','Sé dónde está mi stop y mi objetivo antes de entrar'];
+}
+function planText(){
+  if(!S.planReady)return 'El usuario aún no ha creado su plan.';
+  const r=S.rules;
+  return [`Nombre: ${r.name||'(sin nombre)'}`,`Mercados: ${r.markets.join(', ')}`,`Horario de trading: ${r.start}–${r.end}`,`Riesgo por operación: ${r.risk} %`,`Máximo de operaciones al día: ${r.maxTrades}`,`Pérdida máxima diaria: ${r.maxLoss} R`,`Setup (palabras del usuario): ${r.setup||'pendiente de escribir'}`,`Gestión (palabras del usuario): ${r.management||'pendiente de escribir'}`,
+   'Protocolos activos: '+planProtos().filter(p=>!S.protoOff[p.id]).map(p=>`${p.title} (${p.body})`).join(' | '),
+   'Respuestas del diagnóstico: '+QUESTIONS.map(q=>`${q.eyebrow}: ${q.opts.find(o=>o.id===S.answers[q.id])?.label||'-'}`).join('; ')].join('\n');
+}
+function renderPlan(){
+  const v=$('#v-plan');
+  if(!S.planReady){v.innerHTML=`<div class="card empty"><span class="chip">Primer paso</span><h2>Todavía no tienes plan</h2><p class="muted">Responde 6 preguntas y escribe tus reglas. Tardas unos 3 minutos.</p><button class="btn btn-primary" data-go="diag">Empezar diagnóstico <span class="arr">→</span></button></div>`;return}
+  const r=S.rules,d=new Date(S.planDate);
+  const protos=planProtos();
+  v.innerHTML=`
+  <div class="head"><span class="eyebrow"><span class="dot"></span>Mi plan</span>
+  <h1>Plan de trading${r.name?' de <span class="hl-grad">'+esc(r.name)+'</span>':''}</h1>
+  <div class="doc-head"><span class="chip">Versión 1</span><span class="muted" style="font-size:14px">Creado el ${d.toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}</span></div></div>
+
+  <article class="card">
+    <section class="sec"><span class="sec-n">01 · MERCADOS Y HORARIO</span>
+      <div class="kv"><div><span>Mercados</span><b>${esc(r.markets.join(', '))}</b></div><div><span>Horario</span><b>${esc(r.start)}–${esc(r.end)}</b></div></div></section>
+    <section class="sec"><span class="sec-n">02 · GESTIÓN DEL RIESGO</span>
+      <div class="kv"><div><span>Riesgo por operación</span><b>${esc(r.risk)} %</b></div><div><span>Máx. operaciones/día</span><b>${esc(r.maxTrades)}</b></div><div><span>Pérdida máx. diaria</span><b>−${esc(r.maxLoss)} R</b></div></div>
+      <p class="muted">Al llegar a −${esc(r.maxLoss)} R o a ${esc(r.maxTrades)} operaciones, la sesión termina. Sin excepciones.</p></section>
+    <section class="sec"><span class="sec-n">03 · MI SETUP</span>
+      ${r.setup?`<p class="quote">${esc(r.setup)}</p>`:'<p class="warn">Pendiente de escribir. Sin setup escrito, no hay operación.</p>'}
+      ${r.management?`<h3>Gestión</h3><p class="quote">${esc(r.management)}</p>`:'<p class="warn">Gestión pendiente de escribir: dónde va el stop y dónde sales.</p>'}</section>
+    <section class="sec"><span class="sec-n">04 · CHECKLIST ANTES DE CADA ENTRADA</span>
+      <ul class="checklist">${checklistItems().map((t,i)=>`<li><label><input type="checkbox" id="ck${i}"><span>${esc(t)}</span></label></li>`).join('')}</ul>
+      <p class="hint" id="ck-state">Marca todo antes de entrar. Si algo no se cumple, la operación no se hace.</p></section>
+    <section class="sec"><span class="sec-n">05 · MIS PROTOCOLOS</span>
+      <p class="muted">Salen de tus respuestas. Desactiva los que no quieras o añade los tuyos.</p>
+      <div class="protos">${protos.map(p=>`<div class="proto ${S.protoOff[p.id]?'off':''}"><div><small>${esc(p.cat)} · ${esc(p.trigger)}</small><h3>${esc(p.title)}</h3></div>
+        <button class="switch" role="switch" aria-checked="${!S.protoOff[p.id]}" aria-label="Activar ${esc(p.title)}" data-tg="${esc(p.id)}"></button><p>${esc(p.body)}</p></div>`).join('')}</div>
+      <details class="card" style="padding:18px;gap:12px"><summary style="cursor:pointer;font-weight:800">+ Añadir un protocolo propio</summary>
+        <div class="grid2" style="margin-top:12px">
+          <label class="field full"><span class="label">Cuándo</span><input class="input" id="p-when" placeholder="Ej.: Si llevo dos ganadoras seguidas" maxlength="80"></label>
+          <label class="field full"><span class="label">Qué hago</span><input class="input" id="p-what" placeholder="Ej.: Termino la sesión y lo celebro fuera de la pantalla" maxlength="160"></label>
+        </div><button class="btn btn-ghost btn-sm" id="p-add" style="margin-top:12px">Guardar protocolo</button></details></section>
+    <section class="sec"><span class="sec-n">06 · MI DÍA TIPO</span>
+      <p class="muted">Propuesta según tus respuestas: trading, comida, movimiento, descanso y desconexión. En la app la ajustas en el calendario.</p>
+      <div class="day">${daySlots().map(([t,c,l])=>`<div class="slot"><time>${toHHMM(t)}</time><div class="blk ${c}">${esc(l)}</div></div>`).join('')}</div></section>
+  </article>
+  <div class="row">
+    <button class="btn btn-ghost" id="pl-edit">Editar mis reglas</button>
+    <button class="btn btn-primary" data-go="chat">Hablar con mi copiloto <span class="arr">→</span></button>
+  </div>
+  <button class="btn btn-ghost btn-sm" id="pl-reset" style="justify-self:start">Empezar la demo de cero</button>`;
+  v.querySelectorAll('[data-tg]').forEach(b=>b.onclick=()=>{const id=b.dataset.tg;S.protoOff[id]=!S.protoOff[id];save();renderPlan()});
+  $('#p-add').onclick=()=>{const w=$('#p-when').value.trim(),t=$('#p-what').value.trim();if(!w||!t){toast('Escribe cuándo y qué haces');return}S.ownProtos.push({id:'own'+Date.now(),trigger:w,title:t.length>48?t.slice(0,46)+'…':t,body:t});save();renderPlan();toast('Protocolo añadido')};
+  const cks=[...v.querySelectorAll('.checklist input')];
+  cks.forEach(c=>c.onchange=()=>{const ok=cks.every(x=>x.checked);$('#ck-state').innerHTML=ok?'<span class="hl"><b>Todo en orden.</b></span> Si la entrada es la de tu setup, adelante con tu tamaño calculado.':'Marca todo antes de entrar. Si algo no se cumple, la operación no se hace.'});
+  $('#pl-edit').onclick=()=>{S.stage='rules';save();go('diag')};
+  $('#pl-reset').onclick=()=>{if($('#pl-reset').dataset.sure){S=fresh();save();render();toast('Demo reiniciada')}else{$('#pl-reset').dataset.sure='1';$('#pl-reset').textContent='Pulsa otra vez para borrarlo todo'}};
+}
+
+/* ============================================================
+   3. CALCULADORA (cualquier mercado, valores del usuario)
+   ============================================================ */
+function renderCalc(){
+  const v=$('#v-calc');
+  const markets=S.rules.markets.length?S.rules.markets:MARKETS.map(m=>m[1]);
+  if(!markets.includes(S.calc.market))S.calc.market=markets[0];
+  const m=S.calc.market,a=S.assets[m]||{vpp:'',min:'',step:''};
+  const planRisk=S.planReady?num(S.rules.risk):null;
+  v.innerHTML=`
+  <div class="head"><span class="eyebrow"><span class="dot"></span>Calculadora de riesgo</span>
+  <h1>El tamaño exacto, <span class="hl-grad">antes de entrar</span>.</h1>
+  <p class="lead">Funciona con cualquier mercado. Los datos del contrato los pones tú una vez (cada bróker es distinto) y se guardan para ese mercado.</p></div>
+  <div class="card">
+    <div class="grid2">
+      <label class="field full"><span class="label">Mercado</span><select class="input" id="c-m">${markets.map(x=>`<option ${x===m?'selected':''}>${esc(x)}</option>`).join('')}</select>
+      ${S.rules.markets.length?'':'<span class="hint">Cuando crees tu plan, aquí verás solo tus mercados.</span>'}</label>
+      <label class="field"><span class="label">Capital de la cuenta (€)</span><input class="input" id="c-bal" inputmode="decimal" placeholder="Ej.: 10000" value="${esc(S.calc.balance)}"></label>
+      <label class="field"><span class="label">Riesgo (%)</span><input class="input" id="c-risk" inputmode="decimal" value="${esc(S.calc.risk??(S.planReady?S.rules.risk:''))}" placeholder="Ej.: 0,5"></label>
+      <label class="field full"><span class="label">Distancia del stop</span><input class="input" id="c-sl" inputmode="decimal" placeholder="En puntos o pips, como lo mida tu bróker" value="${esc(S.calc.sl)}"></label>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Datos de ${esc(m)} en tu bróker</h3>
+    <p class="hint">Los encuentras en las "especificaciones del contrato" de tu plataforma. Solo hay que ponerlos la primera vez.</p>
+    <div class="grid2">
+      <label class="field full"><span class="label">Valor de 1 punto/pip con 1 lote (€)</span><input class="input" id="c-vpp" inputmode="decimal" placeholder="Ej.: 1" value="${esc(a.vpp)}"></label>
+      <label class="field"><span class="label">Lote mínimo</span><input class="input" id="c-min" inputmode="decimal" placeholder="Ej.: 0,01" value="${esc(a.min)}"></label>
+      <label class="field"><span class="label">Paso de lote</span><input class="input" id="c-step" inputmode="decimal" placeholder="Ej.: 0,01" value="${esc(a.step)}"></label>
+    </div>
+  </div>
+  <div class="result" aria-live="polite"><div><small>Tamaño para ${esc(m)}</small><strong id="c-out">—</strong></div><div style="text-align:right"><small>Riesgo real</small><b id="c-real">—</b></div></div>
+  <div id="c-w" style="display:grid;gap:8px"></div>`;
+  const calc=()=>{
+    const bal=num($('#c-bal').value),risk=num($('#c-risk').value),sl=num($('#c-sl').value),vpp=num($('#c-vpp').value),min=num($('#c-min').value),step=num($('#c-step').value);
+    S.calc.balance=$('#c-bal').value;S.calc.risk=$('#c-risk').value;S.calc.sl=$('#c-sl').value;S.assets[m]={vpp:$('#c-vpp').value,min:$('#c-min').value,step:$('#c-step').value};save();
+    const w=[];
+    if([bal,risk,sl,vpp,min,step].some(x=>!(x>0))){$('#c-out').textContent='—';$('#c-real').textContent='—';$('#c-w').innerHTML='<p class="warn">Rellena todos los datos para ver tu tamaño.</p>';return}
+    const raw=(bal*risk/100)/(sl*vpp),dec=Math.min(4,(String(step).split(/[.,]/)[1]||'').length);
+    const lots=Math.floor(raw/step+1e-9)*step,real=lots*sl*vpp;
+    if(planRisk&&risk>planRisk)w.push(['red',`Este riesgo (${fmt(risk,2)} %) supera el límite de tu plan (${fmt(planRisk,2)} %).`]);
+    if(lots<min)w.push(['',`El tamaño no alcanza el lote mínimo (${fmt(min,dec)}). Con este stop no puedes respetar tu riesgo: busca otra entrada o no operes.`]);
+    $('#c-out').textContent=lots<min?'0 lotes':fmt(lots,dec)+' lotes';
+    $('#c-real').textContent=lots<min?'—':fmt(real)+' € · '+fmt(real/bal*100)+' %';
+    $('#c-w').innerHTML=w.map(([c,t])=>`<p class="warn ${c}">${t}</p>`).join('')+(lots>=min&&!w.length?'<p class="hint">Redondeado hacia abajo al paso de lote, para no pasarte nunca de tu riesgo.</p>':'');
+  };
+  v.querySelectorAll('input').forEach(i=>i.oninput=calc);
+  $('#c-m').onchange=e=>{S.calc.market=e.target.value;save();renderCalc()};
+  calc();
+}
+
+/* ============================================================
+   4. COPILOTO 24 H (IA)
+   ============================================================ */
+let sample=null,ctl=null,busy=false;
+const CRISIS=/suicid|quitarme la vida|matarme|no quiero vivir|acabar con todo|hacerme daño|autolesi|no puedo más con la vida/i;
+const QUICK=['Estoy agobiado/a y no sé qué hacer','No sé si entrar en esta operación','Acabo de perder y quiero recuperarlo','Llevo días sin cumplir mi plan','Hoy estoy cansado/a, ¿opero?'];
+function rules(){return `Eres el "Copiloto" de Time to Trade, una app de planificación y disciplina para traders. Hablas en español de España, de tú, con calidez y frases cortas. Responde en 2 a 6 frases salvo que te pidan más. Sin listas largas ni markdown pesado.
+
+TU PAPEL: acompañar el PROCESO del trader (plan, disciplina, emociones, hábitos). Escuchas, validas sin juzgar y le devuelves a SU plan y a SUS protocolos.
+
+REGLAS QUE NUNCA ROMPES:
+1. Nunca dices comprar, vender, entrar, salir, mantener ni cerrar una operación, ni das opinión sobre el mercado, precios, niveles o dirección. Si te lo piden, explica con amabilidad que esa decisión es suya y debe salir de su plan, y haz preguntas: ¿cumple tu checklist? ¿Estás dentro de tu horario? ¿Cómo está tu energía? ¿El tamaño está calculado? Recuérdale que no operar también es cumplir el plan.
+2. Nunca prometes rentabilidad ni hablas de cuánto puede ganar.
+3. No eres psicólogo ni médico: no diagnosticas, no usas lenguaje clínico ni etiquetas ("tienes ansiedad", "eres adicto"). Hablas de hábitos, pausas, respiración, descanso. Si el malestar parece fuerte o sostenido, sugiere con cariño hablar con un profesional.
+4. Usa "puede que", "a lo mejor"; nunca "tu problema es".
+5. No inventas reglas que no estén en su plan. Si algo falta en su plan (setup, gestión), anímale a escribirlo.
+6. Si notas riesgo para su vida o integridad, deja el trading a un lado, muestra preocupación sincera y dale estos recursos de España: 024 (línea de atención a la conducta suicida, gratuita, 24 h) y 112 (emergencias). Anímale a hablar ahora con alguien de confianza.
+7. Si te piden algo ajeno al trading o al bienestar, redirige con amabilidad.
+
+PLAN DEL USUARIO:
+${planText()}`}
+function renderChat(){
+  const v=$('#v-chat');
+  v.innerHTML=`
+  <div class="head"><span class="eyebrow"><span class="dot"></span>Copiloto · 24 horas</span>
+  <h1>Habla con tu <span class="hl-grad">copiloto</span>.</h1>
+  <p class="lead">Cuando estés con dudas, con nervios o después de un mal día. Te escucha y te devuelve a tu plan. No te dirá qué operar.</p></div>
+  ${S.planReady?'':`<p class="warn">Funciona mejor con tu plan creado: así conoce tus reglas y protocolos. <button class="hl" data-go="diag" style="font-weight:800;text-decoration:underline">Crear mi plan</button></p>`}
+  <div class="card chat">
+    <div class="msgs" id="msgs" aria-live="polite"></div>
+    <div id="c-crisis"></div>
+    <div class="quick" id="quick">${QUICK.map(q=>`<button data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+    <form class="composer" id="c-form">
+      <label for="c-input" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Escribe a tu copiloto</label>
+      <textarea class="input" id="c-input" rows="1" placeholder="Cuéntame cómo estás…" maxlength="1500"></textarea>
+      <button class="btn btn-primary" id="c-send" type="submit" aria-label="Enviar">Enviar</button>
+    </form>
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <p class="note" style="text-align:left;flex:1">Copiloto de proceso. No es asesoramiento financiero ni psicológico.</p>
+      ${S.chat.length?'<button class="btn btn-ghost btn-sm" id="c-clear" style="flex:0 0 auto">Nueva conversación</button>':''}
+    </div>
+  </div>
+  <div class="crisis" style="margin-top:4px"><b>Si lo estás pasando muy mal</b><span>Llama al <span class="tel">024</span> (gratis, 24 h) o al <span class="tel">112</span> si es una emergencia. No estás solo/a.</span></div>`;
+  drawMsgs();
+  const input=$('#c-input');
+  input.oninput=()=>{input.style.height='auto';input.style.height=Math.min(160,input.scrollHeight)+'px'};
+  input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#c-form').requestSubmit()}};
+  $('#c-form').onsubmit=e=>{e.preventDefault();if(busy){ctl?.abort();return}send(input.value)};
+  v.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>send(b.dataset.q));
+  $('#c-clear')?.addEventListener('click',()=>{ctl?.abort();S.chat=[];save();renderChat()});
+  setBusy(busy);
+}
+function drawMsgs(){
+  const box=$('#msgs');if(!box)return;
+  const intro=`Hola${S.rules.name?', '+S.rules.name:''}. Soy tu copiloto. Puedes escribirme cuando quieras: antes de una sesión, si dudas en una entrada o si el día se ha torcido. ¿Cómo estás ahora mismo?`;
+  box.innerHTML=`<div class="msg ai"><span class="who">Copiloto</span>${esc(intro)}</div>`+
+    S.chat.map(m=>`<div class="msg ${m.role==='user'?'me':'ai'}">${m.role==='user'?'':'<span class="who">Copiloto</span>'}${esc(m.content)}</div>`).join('');
+  $('#quick').hidden=S.chat.length>0;
+}
+function setBusy(b){busy=b;const s=$('#c-send');if(s){s.textContent=b?'Parar':'Enviar';s.setAttribute('aria-label',b?'Parar respuesta':'Enviar')}}
+async function send(text){
+  text=String(text||'').trim();if(!text||busy)return;
+  const input=$('#c-input');if(input){input.value='';input.style.height='auto'}
+  if(CRISIS.test(text))$('#c-crisis').innerHTML=`<div class="crisis" role="alert"><b>Lo que cuentas importa, y tú también.</b><span>Ahora mismo, por favor, llama al <span class="tel">024</span>: es gratis, anónimo y atienden 24 h. Si estás en peligro, llama al <span class="tel">112</span>. Hablar con alguien de confianza también ayuda.</span></div>`;
+  S.chat.push({role:'user',content:text});save();drawMsgs();
+  const box=$('#msgs'),bubble=document.createElement('div');
+  bubble.className='msg ai thinking';bubble.innerHTML='<span class="who">Copiloto</span>Pensando';box.appendChild(bubble);bubble.scrollIntoView({block:'end',behavior:'smooth'});
+  if(!sample){bubble.classList.remove('thinking');bubble.innerHTML='<span class="who">Copiloto</span>Para que el copiloto responda, abre esta demo dentro de Claude (app o claude.ai) con tu cuenta.';S.chat.pop();save();return}
+  setBusy(true);ctl=new AbortController();
+  const turns=S.chat.slice(-16).map(m=>({role:m.role,content:m.content}));
+  while(turns.length&&turns[0].role!=='user')turns.shift();
+  try{
+    const {text:answer}=await sample([{role:'user',content:rules()},...turns],{cache:false,modelTier:'quick',signal:ctl.signal,
+      onText:({text})=>{bubble.classList.remove('thinking');bubble.innerHTML='<span class="who">Copiloto</span>'+esc(text)}});
+    S.chat.push({role:'assistant',content:answer});save();
+  }catch(e){
+    bubble.classList.remove('thinking');
+    const kept=e&&e.text;
+    if(e&&e.code==='cancelled'){if(kept){S.chat.push({role:'assistant',content:kept});save()}else bubble.remove()}
+    else{
+      const msg={not_granted:'Para usar el copiloto, permite que esta página use Claude cuando te lo pregunte.',sampling_disabled:'El copiloto no está disponible en esta cuenta.',rate_limited:'Demasiados mensajes seguidos. Espera un momento y vuelve a escribir.',session_expired:'Tu sesión de Claude ha caducado. Vuelve a entrar.',refused:'No he podido responder a eso. Prueba a contármelo de otra forma.'}[e&&e.code]||'Se ha cortado la conexión. Vuelve a enviar tu mensaje.';
+      bubble.innerHTML='<span class="who">Copiloto</span>'+esc(kept?kept+'\n\n':'')+'<span class="muted">'+esc(msg)+'</span>';
+      if(!kept){S.chat.pop();save()}
+    }
+  }finally{setBusy(false);ctl=null}
+}
+
+/* ============================================================
+   ARRANQUE
+   ============================================================ */
+function render(){
+  renderNav();
+  for(const id of ['diag','plan','calc','chat'])$('#v-'+id).hidden=S.view!==id;
+  ({diag:renderDiag,plan:renderPlan,calc:renderCalc,chat:renderChat})[S.view]();
+}
+render();
+(async()=>{try{sample=await window.claude?.use?.('sample')??null}catch(e){sample=null}})();
+</script>
