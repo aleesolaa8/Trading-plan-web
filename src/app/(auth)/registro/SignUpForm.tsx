@@ -38,7 +38,7 @@ export function SignUpForm() {
         <h1 id="signup-title">
           Empieza tu <span className="hl-grad">plan</span>.
         </h1>
-        <p className="muted">Después harás un diagnóstico de 6 preguntas para construirlo contigo.</p>
+        <p className="muted">Después harás un diagnóstico de 7 preguntas para construirlo contigo.</p>
       </div>
       <form action={action} className={styles.form} noValidate>
         <Field name="name" label="Tu nombre" autoComplete="given-name" defaultValue={state.values?.name} error={state.fieldErrors?.name} autoFocus />

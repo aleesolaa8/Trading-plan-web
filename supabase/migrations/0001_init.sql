@@ -220,8 +220,8 @@ create table public.calendar_blocks (
   user_id       uuid not null references auth.users(id) on delete cascade,
   title         text not null,
   block_type    text not null check (block_type in
-                  ('trading','backtesting','formacion','analisis','sueno','rutina',
-                   'comida','ejercicio','pausa','desconexion','otro')),
+                  ('trading','analisis','backtesting','formacion','revision','comida','ejercicio',
+                   'sueno','pausa','personal','desconexion','rutina','otro')),
   content_kind  text check (content_kind in ('backtesting','formacion','analisis')),  -- contenido flexible
   start_time    time not null,                       -- hora libre
   duration_min  integer not null check (duration_min between 5 and 1440),
@@ -356,12 +356,36 @@ create table public.weekly_reviews (
 create table public.ai_usage (
   id         bigserial primary key,
   user_id    uuid not null references auth.users(id) on delete cascade,
-  kind       text not null check (kind in ('plan','review','pattern')),
+  kind       text not null check (kind in ('plan','review','pattern','chat')),
   tokens_in  integer,
   tokens_out integer,
   created_at timestamptz not null default now()
 );
 create index ai_usage_user_idx on public.ai_usage(user_id, created_at desc);
+
+-- ---------------------------------------------------------------------
+-- 10. Copiloto 24 h (chat con IA). Solo el servidor llama al modelo.
+-- ---------------------------------------------------------------------
+create table public.chat_threads (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  title      text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index chat_threads_user_idx on public.chat_threads(user_id, updated_at desc);
+create trigger chat_threads_updated before update on public.chat_threads
+  for each row execute function public.set_updated_at();
+
+create table public.chat_messages (
+  id         bigserial primary key,
+  thread_id  uuid not null references public.chat_threads(id) on delete cascade,
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  role       text not null check (role in ('user','assistant','help')),  -- help = recurso de ayuda mostrado
+  content    text not null check (char_length(content) <= 8000),
+  created_at timestamptz not null default now()
+);
+create index chat_messages_thread_idx on public.chat_messages(thread_id, id);
 
 -- =====================================================================
 -- RLS
@@ -385,6 +409,8 @@ alter table public.checklist_runs    enable row level security;
 alter table public.journal_entries   enable row level security;
 alter table public.weekly_reviews    enable row level security;
 alter table public.ai_usage          enable row level security;
+alter table public.chat_threads      enable row level security;
+alter table public.chat_messages     enable row level security;
 
 -- Perfil: solo el propio. El rol no se puede auto-promocionar.
 create policy "perfil propio: leer" on public.profiles
@@ -436,7 +462,8 @@ declare t text;
 begin
   foreach t in array array[
     'quiz_responses','trading_plans','plan_versions','calendar_blocks','assets',
-    'account_settings','checklist_items','checklist_runs','journal_entries','weekly_reviews'
+    'account_settings','checklist_items','checklist_runs','journal_entries','weekly_reviews',
+    'chat_threads','chat_messages'
   ] loop
     execute format(
       'create policy "solo propietario" on public.%I for all

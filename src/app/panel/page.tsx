@@ -24,7 +24,7 @@ export default async function PanelHome() {
         <section className="card" style={{ display: 'grid', gap: 16, maxWidth: 720, marginBottom: 16 }}>
           <span className="chip">Primer paso</span>
           <h2 style={{ fontSize: 'clamp(24px, 3.4vw, 32px)', letterSpacing: '-0.035em', lineHeight: 1.1 }}>
-            Haz tu diagnóstico de 6 preguntas
+            Haz tu diagnóstico de 7 preguntas
           </h2>
           <p className="muted">Con tus respuestas construimos tu plan, tu calendario y tus protocolos. Son unos 3 minutos.</p>
           <div>

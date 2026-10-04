@@ -32,7 +32,7 @@ export default function Home() {
       <div className={styles.stats}>
         <StatsBand
           stats={[
-            { value: '6', label: 'preguntas para un diagnóstico que te explica el porqué' },
+            { value: '7', label: 'preguntas para un diagnóstico que te explica el porqué' },
             { value: '1', label: 'plan escrito con tus reglas, versionado' },
             { value: '0', label: 'señales de compra o venta. Nunca.' },
             { value: '24 h', label: 'copiloto para hablar cuando lo necesites' },

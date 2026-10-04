@@ -18,6 +18,14 @@ on conflict (id) do nothing;
 -- Plantillas de protocolo (user_id NULL)
 -- ---------------------------------------------------------------------
 insert into public.protocols (slug, category, title, trigger_text, body, sort_order) values
+  ('formacion_diaria',    'rutina',      'Bloque diario de formación y backtesting', 'Cada día, fuera del mercado',
+   'Dedico un bloque fijo a estudiar y practicar con datos pasados. Aprendo sin arriesgar dinero.', 1),
+  ('revision_semanal',    'rutina',      'Revisión semanal del journal',  'Cada sábado',
+   'Reviso mis operaciones, mi cumplimiento y mis patrones. Elijo una sola mejora para la semana siguiente.', 2),
+  ('metricas_pro',        'riesgo',      'Revisión de métricas y escalado por reglas', 'Cada semana y cada mes',
+   'Mido cumplimiento, R medio y caída máxima. Solo cambio el tamaño según reglas escritas, nunca por una racha.', 3),
+  ('pausas_90',           'pausas',      'Pausa de 10 minutos cada 90 de pantalla', 'En jornadas largas',
+   'Cada hora y media me levanto, me muevo y miro lejos de la pantalla. La concentración aguanta más.', 12),
   ('ventana_fija',        'rutina',      'Ventana fija de mercado',       'Cada día de trading',
    'Opero solo dentro de mi ventana del calendario. Fuera de ella, el gráfico se cierra.', 10),
   ('sesion_corta',        'rutina',      'Sesión corta y enfocada',       'Si tengo menos de una hora',
@@ -52,8 +60,10 @@ on conflict do nothing;
 -- Preguntas
 -- ---------------------------------------------------------------------
 insert into public.quiz_questions (slug, position, eyebrow, prompt, helper) values
-  ('tiempo_diario', 1, 'Tiempo',     '¿Cuánto tiempo real tienes al día para el trading?',
-   'Cuenta el tiempo que puedes dedicar sin quitárselo al descanso ni a tu gente.'),
+  ('nivel',         0, 'Tu momento', '¿En qué punto estás como trader?',
+   'Sirve para adaptar tu plan. Todos los niveles tienen su sitio aquí.'),
+  ('tiempo_diario', 1, 'Tiempo',     '¿Cuántas horas al día puedes dedicar al trading?',
+   'Cuenta análisis, sesión y revisión. Sin quitárselo al descanso ni a tu gente.'),
   ('riesgo',        2, 'Riesgo',     '¿Cuánto arriesgas hoy en cada operación?',
    'No hay respuesta buena o mala: es el punto de partida.'),
   ('tras_perdida',  3, 'Emociones',  '¿Qué sueles hacer justo después de una pérdida?',
@@ -72,19 +82,37 @@ with q as (select id, slug from public.quiz_questions),
 insert into public.quiz_options (question_id, slug, position, label, why_text, plan_text, protocol_id, value)
 select q.id, o.slug, o.pos, o.label, o.why, o.plan, p.id, o.val::jsonb
 from (values
-  -- 1. Tiempo diario
-  ('tiempo_diario','menos_1h',1,'Menos de 1 hora',
-   'Con poco tiempo es normal querer aprovecharlo al máximo y forzar entradas para “no perder el día”.',
-   'Tu plan concentra el análisis la noche anterior y deja la sesión solo para ejecutar. Menos tiempo, más claridad.',
-   'sesion_corta','{"minutes":45}'),
-  ('tiempo_diario','1_2h',2,'Entre 1 y 2 horas',
-   'Es un margen cómodo, pero sin límites claros una hora se convierte en tres sin darte cuenta.',
-   'Tu calendario marca una ventana fija de mercado y una hora de cierre que no depende del resultado.',
-   'ventana_fija','{"minutes":90}'),
-  ('tiempo_diario','mas_2h',3,'Más de 2 horas',
-   'Mucho tiempo delante del gráfico puede hacer que veas oportunidades donde solo hay ruido.',
-   'Tu plan divide la sesión: ejecución en tu ventana y el resto para backtesting, formación o análisis.',
-   'ventana_fija','{"minutes":150}'),
+  -- 0. Nivel
+  ('nivel','empezando',1,'Estoy empezando',
+   'Al empezar hay mucha información a la vez y es normal querer operar mucho para aprender rápido.',
+   'Tu plan da mucho peso a formación y backtesting, con un riesgo pequeño y fijo mientras construyes tu base.',
+   'formacion_diaria','{"hint":"Aprendiendo, en demo o con poco tiempo operando real"}'),
+  ('nivel','desarrollo',2,'En desarrollo',
+   'En esta etapa ya sabes qué hacer, pero cuesta hacerlo siempre igual. Es la fase más común.',
+   'Tu plan pone el foco en la constancia: checklist antes de cada entrada y revisión semanal del journal.',
+   'revision_semanal','{"hint":"Opero real, pero mis resultados aún no son constantes"}'),
+  ('nivel','consolidado',3,'Consolidado',
+   'Con un proceso que funciona, el reto es no romperlo al aumentar tamaño o tiempo de pantalla.',
+   'Tu plan protege lo que ya funciona y fija reglas escritas para escalar, revisadas con datos.',
+   'metricas_pro','{"hint":"Tengo un proceso estable y quiero escalarlo"}'),
+  ('nivel','profesional',4,'Profesional',
+   'A nivel profesional, el rendimiento depende tanto de la gestión de la energía como de la técnica.',
+   'Tu plan estructura jornadas largas con pausas, métricas semanales y límites claros de pérdida.',
+   'metricas_pro','{"hint":"Vivo del trading o gestiono capital"}'),
+
+  -- 1. Horas al día
+  ('tiempo_diario','h2',1,'Hasta 2 horas',
+   'Con poco tiempo es normal querer aprovecharlo al máximo y forzar entradas para "no perder el día".',
+   'Tu plan concentra la preparación fuera de la sesión y deja la ventana de mercado solo para ejecutar.',
+   'sesion_corta','{"hint":"Compagino el trading con otro trabajo o estudios","max_minutes":120}'),
+  ('tiempo_diario','h3_6',2,'De 3 a 6 horas',
+   'Es un margen amplio, pero sin estructura una sesión se alarga y aparecen entradas por aburrimiento.',
+   'Tu calendario divide el tiempo: análisis, ventana de mercado, pausas y un bloque de revisión o backtesting.',
+   'ventana_fija','{"hint":"Le dedico media jornada","max_minutes":360}'),
+  ('tiempo_diario','h6_10',3,'De 6 a 10 horas',
+   'Muchas horas de pantalla cansan aunque no lo notes, y el cansancio cambia cómo decides.',
+   'Tu plan organiza la jornada en sesiones con pausas cada 90 minutos, comida lejos de la pantalla y cierre fijo.',
+   'pausas_90','{"hint":"Es mi jornada completa","max_minutes":600}'),
 
   -- 2. Riesgo
   ('riesgo','fijo_bajo',1,'Un % fijo, 1 % o menos',
@@ -131,7 +159,7 @@ from (values
    'Mover el stop da sensación de control, pero sin regla suele depender de los nervios del momento.',
    'Tu plan incluye una regla: el stop solo se mueve a favor y según lo escrito.',
    'no_mover_sl','{}'),
-  ('a_favor','dejo_correr',3,'La dejo correr según mi plan',
+  ('a_favor','dejo_correr',3,'La gestiono según mi plan',
    'Dejar trabajar la operación requiere paciencia y confianza en lo que has preparado.',
    'Tu plan lo refuerza dejando la gestión escrita para los días en que dudes.',
    'gestion_escrita','{}'),
@@ -151,7 +179,7 @@ from (values
    'sin_setup_fuera','{}'),
 
   -- 6. Energía
-  ('energia','bien',1,'Bien, descansado/a',
+  ('energia','bien',1,'Bien, con descanso',
    'Una buena base de descanso hace que todo lo demás sea más fácil.',
    'Tu calendario protege lo que ya funciona: horas de sueño, comidas y movimiento como bloques fijos.',
    'rutina_sueno','{}'),
@@ -159,7 +187,7 @@ from (values
    'El trading suele convivir con trabajo, familia y otras cosas. Es lógico que la energía varíe.',
    'Tu plan incluye un chequeo de energía al empezar: si estás bajo, menos riesgo o solo análisis.',
    'energia_check','{}'),
-  ('energia','cansado',3,'Suelo operar cansado/a',
+  ('energia','cansado',3,'Suelo operar con cansancio',
    'Operar al final de un día largo es muy frecuente. El cansancio cambia cómo decidimos.',
    'Tu calendario reserva descanso y movimiento antes de la sesión, y tu plan reduce el riesgo si llegas agotado/a.',
    'movimiento_diario','{}')

@@ -108,7 +108,11 @@ El SQL completo está en `supabase/migrations/0001_init.sql`. Validado en Postgr
 ## 5. Módulos y reglas de negocio
 
 ### 5.1 Diagnóstico y onboarding
-- Las 6 preguntas se leen de `quiz_questions`/`quiz_options` (ver `seed.sql`, ya redactadas en tono de consejo y **pendientes de tu revisión**).
+- **7 preguntas** (decisión del cliente: sirve para todos los niveles) que se leen de `quiz_questions`/`quiz_options` (ver `seed.sql`):
+  0. Nivel: empezando / en desarrollo / consolidado / profesional.
+  1. Horas al día: hasta 2 h / de 3 a 6 h / de 6 a 10 h.
+  2–6. Riesgo, reacción tras pérdida, operación a favor, sin setup, energía.
+- Textos en tono de consejo y **pendientes de revisión humana**.
 - Tras cada respuesta: recuadro en dos partes, **Por qué puede pasar** (azul) y **Cómo lo trabaja tu plan** (verde), más el protocolo que se añadirá.
 - Al terminar, los protocolos de las opciones elegidas se copian a `protocols` del usuario (`source_id` → plantilla). El usuario puede editarlos, desactivarlos o crear los suyos.
 - El aviso de riesgo se muestra y se acepta en el registro (`profiles.disclaimer_accepted_at`) y se repite en el onboarding.
@@ -119,7 +123,10 @@ El SQL completo está en `supabase/migrations/0001_init.sql`. Validado en Postgr
 - Guardarraíles en servidor: *system prompt* con las reglas innegociables + filtro posterior que rechaza y regenera si aparecen órdenes de compra/venta, cifras de rentabilidad prometidas o lenguaje de diagnóstico ("tu problema es…").
 - Límite de generaciones por plan (`plans.features`) controlado con `ai_usage`.
 
-### 5.3 Calendario
+### 5.3 Calendario (apartado propio: "Planificación")
+- Sección independiente del plan. Al crear el plan se **propone una semana** según nivel, horas y sesiones (hasta dos: p. ej. Londres y Nueva York): movimiento, análisis, sesiones partidas con pausa activa cada 90 min en jornadas largas, comida lejos de la pantalla, revisión, backtesting/formación según nivel, desconexión, sueño, revisión semanal el sábado y preparación el domingo.
+- El usuario la ajusta a su gusto; el apartado "Mi día" del plan **lee del calendario**, así siempre coinciden.
+- Tipos de bloque: trading, análisis, backtesting, formación, revisión, comida, ejercicio, sueño, pausa, personal, desconexión, otro.
 - Bloques con hora libre, duración, tipo, días de repetición y contenido flexible.
 - Arrastrar y soltar (dnd-kit) en escritorio; **flechas ↑ ↓ ← →** en cada bloque para móvil y teclado (paso de 15 min / 1 día).
 - Avisos no bloqueantes: solapes entre bloques y más de **N horas seguidas de pantalla** (N configurable, por defecto 3 h) sumando bloques `is_screen` contiguos.
@@ -211,9 +218,9 @@ NEXT_PUBLIC_SITE_URL=
 
 Pendiente: reenviar el brief maestro, el prototipo HTML y las capturas de Gotoyou.
 
-## 8 bis. Copiloto 24 h (chat con IA), propuesta
+## 8 bis. Copiloto 24 h (chat con IA)
 
-Un chat disponible a cualquier hora para acompañar el **proceso**, sobre todo en momentos de agobio. Se construye en el paso 4 junto al generador del plan y comparte sus guardarraíles.
+Un **botón flotante** visible en toda la app (como la atención al cliente de una web) que abre el chat. Acompaña el **proceso**, sobre todo en momentos de agobio. Conoce el plan, el calendario de hoy y el resumen del journal del usuario. Se construye en el paso 4 y comparte guardarraíles con el generador del plan.
 
 **Qué hace**
 - Conoce el plan, los protocolos, el checklist y el journal del usuario (solo los suyos).
@@ -225,10 +232,10 @@ Un chat disponible a cualquier hora para acompañar el **proceso**, sobre todo e
 - Decir compra, vende, entra o sal, ni opinar sobre el mercado.
 - Prometer rentabilidad.
 - Hacer terapia ni diagnosticar. Es apoyo y hábitos, no un psicólogo.
-- Ante señales de crisis (autolesión, desesperación grave), deja el tema del trading y muestra recursos de ayuda: **024** (línea de atención a la conducta suicida, España, 24 h, gratuita) y **112** para emergencias.
+- **Sin avisos fijos sobre crisis** (decisión del cliente: dan mala imagen). Solo si el usuario escribe algo que indique riesgo para su vida, el chat muestra de forma discreta el 024 y el 112 dentro de la conversación.
 
 **Técnica**
-- Tablas `chat_threads` y `chat_messages` con RLS (solo el dueño).
+- Tablas `chat_threads` y `chat_messages` con RLS (solo el dueño), ya incluidas en el esquema.
 - Respuestas en streaming desde `app/api/ai/chat/route.ts`. La clave de la IA nunca llega al navegador.
 - Filtro de salida que bloquea órdenes de compra/venta y lenguaje clínico, y detector de crisis antes de llamar al modelo.
 - Límite de mensajes al mes por plan (`plans.features.chat_messages_per_month`) para controlar costes.
