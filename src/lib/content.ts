@@ -112,7 +112,9 @@ export type MyProtocol = {
   own: boolean
 }
 export type MyBlock = { id: string; title: string; type: BlockType; start: number; duration: number; days: number[] }
+export type PlanVersionInfo = { version: number; source: 'ai' | 'user' | 'review'; createdAt: string; note: string | null }
 export type MyPlan = {
+  versions: PlanVersionInfo[]
   version: number
   createdAt: string
   content: PlanContent
@@ -132,7 +134,7 @@ export async function getMyPlan(userId: string): Promise<MyPlan | null> {
     ?.current
   if (!current) return null
 
-  const [{ data: protocols }, { data: blocks }] = await Promise.all([
+  const [{ data: protocols }, { data: blocks }, { data: versions }] = await Promise.all([
     supabase
       .from('protocols')
       .select('id, category, title, trigger_text, body, is_active, source_id, sort_order, created_at')
@@ -140,9 +142,16 @@ export async function getMyPlan(userId: string): Promise<MyPlan | null> {
       .order('sort_order')
       .order('created_at'),
     supabase.from('calendar_blocks').select('id, title, block_type, start_time, duration_min, days_of_week').eq('user_id', userId),
+    supabase
+      .from('plan_versions')
+      .select('version, source, created_at, change_note')
+      .eq('user_id', userId)
+      .order('version', { ascending: false })
+      .limit(12),
   ])
 
   return {
+    versions: (versions ?? []).map((v) => ({ version: v.version, source: v.source, createdAt: v.created_at, note: v.change_note })),
     version: current.version,
     createdAt: current.created_at,
     content: current.content,

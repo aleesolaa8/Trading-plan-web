@@ -7,7 +7,7 @@ import { getMyPlan } from '@/lib/content'
 import { hhmm, LEVEL_LABEL, SCREEN_TYPES } from '@/lib/domain/plan'
 import { DAY_NAMES, formatDuration, nowInZone } from '@/lib/domain/time'
 import { createClient, getCurrentUser } from '@/lib/supabase/server'
-import { Checklist, Protocols } from './PlanInteractive'
+import { Checklist, DraftButton, Protocols } from './PlanInteractive'
 import styles from './plan.module.css'
 
 export const metadata: Metadata = { title: 'Mi plan' }
@@ -19,6 +19,8 @@ export default async function PlanPage({ searchParams }: PageProps<'/panel/plan'
   const user = await getCurrentUser()
   if (!user) redirect('/login?next=/panel/plan')
   const [plan, sp, supabase] = await Promise.all([getMyPlan(user.id), searchParams, createClient()])
+  const { data: planQuota } = (await supabase?.rpc('ai_quota', { p_kind: 'plan' })) ?? { data: null }
+  const pq = (planQuota ?? { used: 0, limit: 0 }) as { used: number; limit: number }
 
   if (!plan) {
     return (
@@ -83,6 +85,44 @@ export default async function PlanPage({ searchParams }: PageProps<'/panel/plan'
           <small>riesgo de {fmt(r.risk)} % por operación</small>
         </div>
       </div>
+
+      <section className={`card ${styles.aiCard}`}>
+        <div className={styles.secTop}>
+          <span className={styles.secN}>Tu plan, redactado</span>
+          {plan.content.ai && <span className="chip chip-blue">Redactado con IA · solo con tus reglas</span>}
+        </div>
+        {plan.content.ai ? (
+          <>
+            <p className={styles.lede}>{plan.content.ai.resumen}</p>
+            <div className={styles.aiSecs}>
+              {plan.content.ai.secciones.map((s) => (
+                <div key={s.titulo}>
+                  <h3>{s.titulo}</h3>
+                  <p>{s.texto}</p>
+                </div>
+              ))}
+            </div>
+            {plan.content.ai.preguntas.length > 0 && (
+              <div className={styles.questions}>
+                <h3>Para completar tu plan</h3>
+                <ul className="arrows">
+                  {plan.content.ai.preguntas.map((q) => (
+                    <li key={q}>{q}</li>
+                  ))}
+                </ul>
+                <Link href="/panel/diagnostico" className={styles.link}>
+                  Añadirlo a mis reglas →
+                </Link>
+              </div>
+            )}
+          </>
+        ) : (
+          <p className="muted">
+            La IA convierte tus reglas en un plan escrito, claro y ordenado. No inventa nada: si falta algo, te lo pregunta.
+          </p>
+        )}
+        <DraftButton hasDraft={Boolean(plan.content.ai)} left={Math.max(0, pq.limit - pq.used)} limit={pq.limit} />
+      </section>
 
       <article className={`card ${styles.doc}`}>
         <section className={styles.sec}>
@@ -188,6 +228,24 @@ export default async function PlanPage({ searchParams }: PageProps<'/panel/plan'
           )}
         </section>
       </article>
+
+      <section className={`card ${styles.versions}`}>
+        <span className={styles.secN}>Historial de versiones</span>
+        <ol>
+          {plan.versions.map((v) => (
+            <li key={v.version} className={v.version === plan.version ? styles.currentV : ''}>
+              <b>Versión {v.version}</b>
+              <span className="chip" data-source={v.source}>
+                {v.source === 'ai' ? 'IA' : v.source === 'review' ? 'Revisión' : 'Tus reglas'}
+              </span>
+              <span className="muted">
+                {new Date(v.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                {v.note ? ` · ${v.note}` : ''}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
 
       <div className={styles.actions}>
         <ButtonLink href="/panel/diagnostico" variant="ghost">

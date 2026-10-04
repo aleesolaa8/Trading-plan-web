@@ -1,6 +1,6 @@
 # Time to Trade · Plan de arquitectura
 
-> Estado: pasos 1, 2 y 3 terminados. Siguiente: paso 4 (plan con IA, versiones y copiloto).
+> Estado: pasos 1 a 4 terminados. Siguiente: paso 5 (calendario con bloques movibles).
 > Prioridad: este documento sigue el *Prompt v2*; el brief maestro, el prototipo HTML y las capturas de Gotoyou **no llegaron adjuntos** y hay que revisarlos contra este plan cuando estén.
 
 ---
@@ -119,9 +119,11 @@ El SQL completo está en `supabase/migrations/0001_init.sql`. Validado en Postgr
 
 ### 5.2 Generador de plan con IA
 - Entrada: respuestas del diagnóstico + reglas que el usuario escribe (mercado, horario, setup, gestión). **Si falta una regla, la IA pregunta; no la inventa.**
-- Salida: JSON validado con Zod (`secciones`, `horario`, `riesgo`, `checklist`, `protocolos`). Se guarda como nueva `plan_version`.
-- Guardarraíles en servidor: *system prompt* con las reglas innegociables + filtro posterior que rechaza y regenera si aparecen órdenes de compra/venta, cifras de rentabilidad prometidas o lenguaje de diagnóstico ("tu problema es…").
-- Límite de generaciones por plan (`plans.features`) controlado con `ai_usage`.
+- Salida: JSON validado con Zod (`resumen`, `secciones`, `preguntas`), en `src/lib/ai/plan-writer.ts`. Se guarda como nueva `plan_version` (origen `ai`) dentro de `content.ai`; las reglas y el checklist siguen siendo los del usuario.
+- `preguntas`: lo que falta en las reglas (stop, objetivo…). Se muestran como "Para completar tu plan" con enlace a sus reglas.
+- Guardarraíles en servidor: *system prompt* con las reglas innegociables + filtro posterior (`src/lib/ai/guardrails.ts`) que rechaza el texto y devuelve el cupo si aparecen órdenes de compra/venta, cifras de rentabilidad prometidas o lenguaje de diagnóstico ("tu problema es…").
+- Límite de redacciones al mes por plan (`plans.features.ai_plan_generations`: Core 3, Pro 20). Se descuenta de forma atómica en la base de datos con `consume_ai_quota()` (migración 0003) y se devuelve con `refund_ai_quota()` si la IA falla.
+- Historial de versiones visible en "Mi plan" (últimas 12).
 
 ### 5.3 Calendario (apartado propio: "Planificación")
 - Sección independiente del plan. Al crear el plan se **propone una semana** según nivel, horas y sesiones (hasta dos: p. ej. Londres y Nueva York): movimiento, análisis, sesiones partidas con pausa activa cada 90 min en jornadas largas, comida lejos de la pantalla, revisión, backtesting/formación según nivel, desconexión, sueño, revisión semanal el sábado y preparación el domingo.
@@ -199,6 +201,7 @@ STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 STRIPE_PRICE_CORE=                  # price_xxx de 14,99 €/mes
 ANTHROPIC_API_KEY=                  # solo servidor
+ANTHROPIC_MODEL=                    # opcional: cambia el modelo sin tocar código
 NEXT_PUBLIC_SITE_URL=
 ```
 
@@ -264,7 +267,7 @@ Principio: **Core es completo** para operar con un plan. Pro suma lo que más cu
 
 ## 8 bis. Copiloto 24 h (chat con IA)
 
-Un **botón flotante** visible en toda la app (como la atención al cliente de una web) que abre el chat. Acompaña el **proceso**, sobre todo en momentos de agobio. Conoce el plan, el calendario de hoy y el resumen del journal del usuario. Se construye en el paso 4 y comparte guardarraíles con el generador del plan.
+Un **botón flotante** visible en toda la app (como la atención al cliente de una web) que abre el chat. Acompaña el **proceso**, sobre todo en momentos de agobio. Conoce el plan, el calendario de hoy y el resumen del journal del usuario. Hecho en el paso 4; comparte guardarraíles con el generador del plan.
 
 **Qué hace**
 - Conoce el plan, los protocolos, el checklist y el journal del usuario (solo los suyos).
@@ -282,7 +285,11 @@ Un **botón flotante** visible en toda la app (como la atención al cliente de u
 - Tablas `chat_threads` y `chat_messages` con RLS (solo el dueño), ya incluidas en el esquema.
 - Respuestas en streaming desde `app/api/ai/chat/route.ts`. La clave de la IA nunca llega al navegador.
 - Filtro de salida que bloquea órdenes de compra/venta y lenguaje clínico, y detector de crisis antes de llamar al modelo.
-- Límite de mensajes al mes por plan (`plans.features.chat_messages_per_month`) para controlar costes.
+- Límite de mensajes al mes por plan (`plans.features.copilot_messages_per_month`): **Core 40**, **Pro sin límite** (tope técnico de uso razonable de 1.500/mes para evitar abusos; en pantalla no se muestra contador). La prueba gratis de 7 días cuenta como Pro.
+- El cupo se comprueba y descuenta en la base de datos (`consume_ai_quota('chat')`, con bloqueo para que dos pestañas no lo salten). Si la IA falla, se devuelve.
+- Al agotar el cupo, el chat muestra una tarjeta "Has llegado a tu límite del mes" con el botón **Pasar a Pro**; si no hay plan activo, "Elegir mi plan".
+- Peticiones: modelo configurable (`ANTHROPIC_MODEL`), reglas fijas en caché (más baratas a partir del segundo mensaje), datos del usuario en un bloque aparte, respaldo automático de modelo si el principal está saturado, y las últimas 20 intervenciones como historial.
+- Coste orientativo: ~0,01 € por mensaje. Un usuario Core al máximo ≈ 0,40 €/mes; un Pro muy intensivo (1.500) ≈ 15 €/mes, lo normal es mucho menos.
 - Aviso visible en el chat: "Copiloto de proceso. No es asesoramiento financiero ni psicológico."
 
 ## 9. Cómo probar el paso 1
@@ -307,7 +314,7 @@ Para comprobar RLS: crea dos usuarios, inserta una entrada de journal con el pri
 
 2. ~~Auth, layout y sistema de diseño~~ **hecho**.
 3. ~~Landing, diagnóstico explicativo y onboarding~~ **hecho**: el onboarding se guarda en una sola transacción con `complete_onboarding()` (migración 0002).
-4. Generador de plan con IA, protocolos, versiones y **copiloto 24 h**.
+4. ~~Generador de plan con IA, protocolos, versiones y copiloto 24 h~~ **hecho** (migración 0003: cupos de IA).
 5. Calendario con bloques movibles.
 6. Calculadora, checklist y journal con patrones.
 7. Dashboard y revisión semanal con IA.

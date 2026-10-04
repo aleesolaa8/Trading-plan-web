@@ -3,7 +3,7 @@
 import { useOptimistic, useState, useTransition } from 'react'
 import { Button } from '@/components/ui/Button'
 import type { MyProtocol } from '@/lib/content'
-import { addProtocol, deleteProtocol, toggleProtocol } from './actions'
+import { addProtocol, deleteProtocol, draftWithAI, toggleProtocol } from './actions'
 import styles from './plan.module.css'
 
 const CATEGORY: Record<string, string> = {
@@ -128,5 +128,36 @@ export function Protocols({ protocols }: { protocols: MyProtocol[] }) {
         </div>
       </details>
     </>
+  )
+}
+
+export function DraftButton({ hasDraft, left, limit }: { hasDraft: boolean; left: number; limit: number }) {
+  const [pending, start] = useTransition()
+  const [msg, setMsg] = useState<string | null>(null)
+  return (
+    <div className={styles.draftRow}>
+      <Button
+        arrow={!pending}
+        disabled={pending || limit === 0}
+        aria-busy={pending}
+        onClick={() =>
+          start(async () => {
+            setMsg(null)
+            const r = await draftWithAI()
+            if (!r.ok) setMsg(r.message ?? 'No se ha podido redactar.')
+          })
+        }
+      >
+        {pending ? 'Redactando tu plan… (unos segundos)' : hasDraft ? 'Volver a redactar con IA' : 'Redactar mi plan con IA'}
+      </Button>
+      <span className="muted" style={{ fontSize: 13 }}>
+        {limit > 0 ? `Te quedan ${left} de ${limit} redacciones este mes. Cada una crea una versión nueva.` : 'Disponible con un plan activo.'}
+      </span>
+      {msg && (
+        <p className="notice notice-error" role="alert">
+          {msg}
+        </p>
+      )}
+    </div>
   )
 }

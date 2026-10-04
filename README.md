@@ -11,8 +11,9 @@ SaaS de planificación y registro para traders: diagnóstico, plan escrito con t
 | 1. Arquitectura y esquema SQL | Hecho · [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) |
 | 2. Auth, layout y sistema de diseño | Hecho |
 | 3. Landing, diagnóstico y onboarding | Hecho |
-| 4. Plan con IA, protocolos, versiones y copiloto | Siguiente |
-| 5–8 | Pendientes |
+| 4. Plan con IA, protocolos, versiones y copiloto | Hecho |
+| 5. Calendario con bloques movibles | Siguiente |
+| 6–8 | Pendientes |
 
 ## Arrancar en local
 
@@ -25,6 +26,8 @@ supabase start            # muestra la URL y la anon key: cópialas a .env.local
 supabase db reset         # aplica supabase/migrations + supabase/seed.sql
 npm run dev               # http://localhost:3000
 ```
+
+Para el copiloto y la redacción del plan añade `ANTHROPIC_API_KEY` a `.env.local` (opcional `ANTHROPIC_MODEL` para cambiar de modelo). Sin clave, la app funciona y el copiloto muestra que se activará pronto.
 
 En local, Supabase confirma los emails automáticamente. Los correos (recuperar contraseña) se ven en el buzón de pruebas que indica `supabase start`.
 

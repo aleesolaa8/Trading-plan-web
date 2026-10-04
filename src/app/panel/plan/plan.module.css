@@ -272,3 +272,66 @@
     gap: 4px;
   }
 }
+.aiCard {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 18px;
+  border-color: color-mix(in srgb, var(--blue) 30%, var(--line));
+}
+.lede {
+  font-size: 18px;
+  line-height: 1.55;
+}
+.aiSecs {
+  display: grid;
+  gap: 14px;
+}
+.aiSecs h3 {
+  font-size: 16px;
+}
+.aiSecs p {
+  margin-top: 4px;
+  color: var(--muted);
+  white-space: pre-wrap;
+}
+.questions {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--amber) 35%, transparent);
+  background: var(--amber-soft);
+}
+.questions h3 {
+  font-size: 15px;
+  color: var(--amber);
+}
+.draftRow {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+.versions {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+.versions ol {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+.versions li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  font-size: 14px;
+}
+.currentV {
+  border-color: color-mix(in srgb, var(--green) 45%, var(--line)) !important;
+}

@@ -3,6 +3,7 @@ import { Logo } from '@/components/ui/Logo'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { signOut } from '@/lib/auth/actions'
 import { AppNav } from './AppNav'
+import { Copilot } from './Copilot'
 import styles from './AppShell.module.css'
 
 export function AppShell({ name, email, children }: { name: string; email: string | null; children: React.ReactNode }) {
@@ -44,6 +45,7 @@ export function AppShell({ name, email, children }: { name: string; email: strin
         <div className={styles.inner}>{children}</div>
       </main>
       <AppNav variant="bottom" />
+      <Copilot name={name} />
     </div>
   )
 }

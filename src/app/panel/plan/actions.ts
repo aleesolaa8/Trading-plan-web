@@ -54,3 +54,13 @@ export async function deleteProtocol(id: string): Promise<ActionResult> {
   revalidatePath('/panel/plan')
   return { ok: true }
 }
+
+export async function draftWithAI(): Promise<ActionResult> {
+  const user = await getCurrentUser()
+  const supabase = await createClient()
+  if (!user || !supabase) return { ok: false, message: 'Tu sesión ha caducado.' }
+  const { writePlanWithAI } = await import('@/lib/ai/plan-writer')
+  const r = await writePlanWithAI(supabase, user.id)
+  if (r.ok) revalidatePath('/panel/plan')
+  return r.ok ? { ok: true } : { ok: false, message: r.message }
+}

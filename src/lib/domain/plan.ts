@@ -211,6 +211,8 @@ export type PlanContent = {
   time: string | null
   rules: Rules
   checklist: string[]
+  /** Redacción hecha por la IA a partir de las reglas (opcional) */
+  ai?: { resumen: string; secciones: { titulo: string; texto: string }[]; preguntas: string[]; generatedAt: string }
 }
 
 export function buildPlanContent(answers: Answers, rules: Rules): PlanContent {
