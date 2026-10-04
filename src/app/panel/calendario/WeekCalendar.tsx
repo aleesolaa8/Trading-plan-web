@@ -245,10 +245,10 @@ export function WeekCalendar({
                         key={b.id}
                         role="button"
                         tabIndex={0}
-                        className={`${styles.block} ${styles[`t_${b.type}`] ?? ''} ${drag?.id === b.id ? styles.dragging : ''} ${short ? styles.short : b.duration < 60 ? styles.mid : ''}`}
+                        className={`${styles.block} ${styles[`t_${b.type}`] ?? ''} ${drag?.id === b.id ? styles.dragging : ''} ${short ? styles.short : b.duration < 60 ? styles.mid : ''} ${b.duration <= 15 ? styles.tiny : ''}`}
                         style={{
                           top: (b.start - from) * (H / 60),
-                          height: Math.max(18, b.duration * (H / 60) - 2),
+                          height: Math.max(10, b.duration * (H / 60) - 2),
                           left: `calc(${(l.col / l.cols) * 100}% + 2px)`,
                           width: `calc(${100 / l.cols}% - 4px)`,
                         }}

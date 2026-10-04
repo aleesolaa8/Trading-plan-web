@@ -155,6 +155,18 @@
 .mid b {
   -webkit-line-clamp: 1;
 }
+.mid {
+  padding-block: 3px;
+  gap: 0;
+}
+.tiny {
+  padding: 0 6px;
+  border-radius: 6px;
+}
+.tiny b {
+  font-size: 10px;
+  line-height: 1;
+}
 .dragging {
   z-index: 4;
   cursor: grabbing;
