@@ -41,6 +41,7 @@
   color-scheme:light;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1,"cv11" 1}
 a{color:inherit;text-decoration:none}
@@ -281,6 +282,13 @@ ul.crosses li::before{content:"×";color:var(--red);font-size:20px;line-height:1
 
 /* FAQ */
 .faq{display:grid;gap:10px;max-width:860px}
+.faq-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.faq-filter button{padding:10px 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);font-weight:700;font-size:14px;color:var(--muted);transition:all .15s}
+.faq-filter button:hover{color:var(--text)}
+.faq-filter button[aria-pressed="true"]{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+.faq-groups{display:grid;gap:32px}
+.faq-h{font-size:13px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+.faq-more{margin-top:28px}
 details{border:1px solid var(--line);border-radius:20px;background:var(--card);padding:0 22px;transition:border-color .2s}
 details[open]{border-color:var(--line-2)}
 summary{list-style:none;cursor:pointer;padding:20px 0;font-weight:800;font-size:17px;display:flex;justify-content:space-between;gap:16px}
@@ -582,22 +590,17 @@ footer{border-top:1px solid var(--line);padding:48px 0 40px;font-size:14px;color
         <a href="#top" class="btn btn-primary btn-xl">Probar Pro 7 días gratis <span class="arr">→</span></a>
       </article>
     </div>
-    <p class="muted plans-note">Prueba de 7 días con todo Pro incluido. Al terminar eliges plan; si no eliges, no se cobra nada. El IVA se calcula en el pago según tu país.</p>
+    <p class="muted plans-note">Prueba de 7 días con todo Pro incluido y sin tarjeta. Al terminar eliges plan; si no eliges, no se cobra nada. El IVA se calcula en el pago según tu país.</p>
   </div>
 </section>
 
 <!-- ============ FAQ ============ -->
 <section class="sec" id="faq">
   <div class="wrap">
-    <div class="sec-head reveal"><span class="eyebrow"><span class="dot"></span>Preguntas</span><h2>Lo que nos <span class="hl">suelen preguntar.</span></h2></div>
-    <div class="faq">
-      <details class="reveal"><summary>¿Me vais a decir qué operar?</summary><p>No. Nunca damos señales ni recomendaciones de compra o venta. Te ayudamos a escribir, cumplir y revisar tu propio plan.</p></details>
-      <details class="reveal"><summary>¿La IA inventa mi estrategia?</summary><p>No. Solo ordena y redacta las reglas que tú das. Si falta algo, te lo pregunta en lugar de inventarlo.</p></details>
-      <details class="reveal"><summary>¿Quién ve mis datos?</summary><p>Solo tú. Cada registro está aislado por usuario a nivel de base de datos.</p></details>
-      <details class="reveal"><summary>¿Qué diferencia hay entre Core y Pro?</summary><p>Con Core tienes todo para operar con un plan: diagnóstico, plan, calendario, calculadora, checklist, journal con patrones y recordatorios. Pro suma el copiloto con IA sin límite, las revisiones escritas por IA, estadísticas avanzadas y hasta 3 cuentas, por ejemplo tu cuenta personal y una de fondeo.</p></details>
-      <details class="reveal"><summary>¿Puedo cambiar de plan o cancelar?</summary><p>Sí, cuando quieras y desde tu cuenta. No hay permanencia. Si pasas a Pro, el cambio es inmediato y solo pagas la diferencia proporcional.</p></details>
-      <details class="reveal"><summary>¿Sirve si opero poco tiempo al día?</summary><p>Sí. El plan se adapta al tiempo que tienes y protege tu descanso, tus comidas y tu desconexión.</p></details>
-    </div>
+    <div class="sec-head reveal"><span class="eyebrow"><span class="dot"></span>Preguntas frecuentes</span><h2>Lo que nos <span class="hl">suelen preguntar.</span></h2></div>
+    <div class="faq-filter" role="group" aria-label="Filtrar preguntas"><button type="button" data-faq="all" aria-pressed="true">Todas</button><button type="button" data-faq="producto" aria-pressed="false">Producto</button><button type="button" data-faq="ia" aria-pressed="false">IA y copiloto</button><button type="button" data-faq="planes" aria-pressed="false">Planes y pagos</button><button type="button" data-faq="datos" aria-pressed="false">Datos y seguridad</button></div>
+    <div class="faq-groups"><div class="faq-group" data-group="producto"><h3 class="faq-h">Producto</h3><div class="faq"><details><summary>¿Qué es Time to Trade exactamente?</summary><p>Una plataforma para planificar y cumplir tu trading: haces un diagnóstico, escribes tus reglas y recibes un plan, un calendario semanal, una calculadora de riesgo, un checklist y un journal que te enseña tus patrones. Todo en un mismo sitio.</p></details><details><summary>¿Me vais a decir qué operar?</summary><p>No. Nunca damos señales ni recomendaciones de compra o venta. Te ayudamos a escribir, cumplir y revisar tu propio plan.</p></details><details><summary>¿Es para mí si estoy empezando?</summary><p>Sí. El diagnóstico detecta tu nivel y adapta el plan: si empiezas, da más peso a formación y backtesting con un riesgo pequeño. Si ya eres profesional, organiza jornadas largas, métricas y límites.</p></details><details><summary>¿Sirve si opero poco tiempo al día?</summary><p>Sí. El plan se adapta al tiempo que tienes, desde menos de 2 horas hasta jornadas completas, y protege tu descanso, tus comidas y tu desconexión.</p></details><details><summary>¿Funciona con cualquier mercado y bróker?</summary><p>Sí: índices, forex, oro, petróleo, cripto, acciones o futuros. Si tu mercado no está en la lista, lo añades con su nombre. Los datos del contrato los pones tú una vez, así la calculadora sirve para cualquier bróker.</p></details><details><summary>¿Tengo que conectar mi cuenta del bróker?</summary><p>No. Nunca te pedimos claves ni acceso a tu dinero. Tú apuntas tus operaciones en el journal; así además reflexionas sobre cada una.</p></details><details><summary>¿Sirve para cuentas de fondeo?</summary><p>Sí. Con Pro puedes añadir tu cuenta de fondeo con las reglas de la prueba (pérdida diaria, caída máxima y objetivo) y ver en todo momento cuánto margen te queda.</p></details><details><summary>¿Puedo usarlo en el móvil y en el ordenador?</summary><p>Sí, en los dos y con tus datos sincronizados. Además puedes instalarlo como una app desde el navegador, sin pasar por ninguna tienda de aplicaciones.</p></details></div></div><div class="faq-group" data-group="ia"><h3 class="faq-h">IA y copiloto</h3><div class="faq"><details><summary>¿Qué hace el copiloto 24 h?</summary><p>Es un chat que conoce tu plan, tu calendario y tu journal. Puedes escribirle antes de una sesión, cuando dudas en una entrada o después de un mal día. Te escucha, te ayuda a ordenar la cabeza y te devuelve a tus reglas.</p></details><details><summary>¿La IA me dice si entrar o no en una operación?</summary><p>No. Te ayuda a revisar tu checklist, tu horario, tu energía y tu riesgo, pero la decisión es siempre tuya y sale de tu plan. No operar también es cumplir el plan.</p></details><details><summary>¿La IA inventa mi estrategia?</summary><p>No. Solo ordena y redacta las reglas que tú das. Si falta algo, te lo pregunta en lugar de inventarlo.</p></details><details><summary>¿El copiloto sustituye a un psicólogo?</summary><p>No. Es un apoyo para tus hábitos y tu proceso de trading: pausas, descanso, disciplina. Si lo que sientes pesa mucho o dura en el tiempo, lo mejor es hablar con un profesional.</p></details></div></div><div class="faq-group" data-group="planes"><h3 class="faq-h">Planes y pagos</h3><div class="faq"><details><summary>¿Qué diferencia hay entre Core y Pro?</summary><p>Con Core tienes todo para operar con un plan: diagnóstico, plan, calendario, calculadora, checklist, journal con patrones y recordatorios. Pro suma el copiloto con IA sin límite, las revisiones escritas por IA, estadísticas avanzadas y hasta 3 cuentas, por ejemplo tu cuenta personal y una de fondeo.</p></details><details><summary>¿Cómo funciona la prueba gratis?</summary><p>Tienes 7 días con todo Pro incluido y sin poner tarjeta. Al terminar eliges el plan que quieras. Si no eliges ninguno, no se cobra nada.</p></details><details><summary>¿Puedo cambiar de plan o cancelar?</summary><p>Sí, cuando quieras y desde tu cuenta. No hay permanencia. Si pasas a Pro, el cambio es inmediato y solo pagas la diferencia proporcional.</p></details><details><summary>¿Qué ventaja tiene el pago anual?</summary><p>Pagas 10 meses y tienes 12: Core sale a unos 12,49 € al mes y Pro a unos 20,83 € al mes.</p></details><details><summary>¿Recibo factura? ¿Lleva IVA?</summary><p>Sí. Recibes factura por email en cada pago, con el IVA desglosado según tu país. Sirve para autónomos y empresas.</p></details><details><summary>¿Qué formas de pago aceptáis?</summary><p>Tarjeta de débito o crédito y otros métodos habituales según tu país. El pago lo gestiona Stripe, una plataforma de pagos segura; nosotros nunca vemos los datos de tu tarjeta.</p></details></div></div><div class="faq-group" data-group="datos"><h3 class="faq-h">Datos y seguridad</h3><div class="faq"><details><summary>¿Quién ve mis datos?</summary><p>Solo tú. Cada registro está aislado por usuario en la base de datos y los servidores están en la Unión Europea.</p></details><details><summary>¿Qué pasa con mis datos si cancelo?</summary><p>Siguen siendo tuyos. Puedes descargarlos cuando quieras y, si lo pides, los borramos por completo.</p></details><details><summary>¿Garantizáis resultados?</summary><p>No. Nadie puede garantizarlos. Te damos las herramientas para operar con un plan y cumplirlo; los resultados dependen del mercado y de ti.</p></details></div></div></div>
+    <p class="muted faq-more">¿No encuentras tu respuesta? Escríbenos y te contestamos en menos de 24 horas.</p>
   </div>
 </section>
 
@@ -656,6 +659,12 @@ const box=document.getElementById('opts'),ex=document.getElementById('explain');
 opts.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.type='button';b.setAttribute('aria-pressed','false');b.innerHTML=`<span class="radio"></span>${o.l}`;
  b.onclick=()=>{box.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');
  document.getElementById('why').textContent=o.w;document.getElementById('plan').textContent=o.p;document.getElementById('proto').textContent=o.pr;ex.classList.add('on')};box.appendChild(b)});
+
+// Filtro de preguntas frecuentes
+document.querySelectorAll('[data-faq]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-faq]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  document.querySelectorAll('.faq-group').forEach(g=>g.hidden=b.dataset.faq!=='all'&&g.dataset.group!==b.dataset.faq);
+}));
 
 // Precio mensual / anual
 document.querySelectorAll('[data-bill]').forEach(b=>b.addEventListener('click',()=>{

@@ -241,7 +241,7 @@ Principio: **Core es completo** para operar con un plan. Pro suma lo que más cu
 | Informe mensual en PDF | — | Sí |
 
 - **Cambios respecto a la primera propuesta:** recordatorios y exportar CSV pasan a Core (son baratos, ayudan a cumplir el plan y exportar los propios datos es un derecho del usuario); el copiloto de Core sube de 30 a 40 mensajes; Pro gana el informe mensual en PDF.
-- 7 días de prueba con todo Pro; al terminar el usuario elige plan y, si no elige, no se cobra nada. Sin permanencia; cambio de plan con prorrateo desde el Customer Portal.
+- 7 días de prueba con todo Pro **sin pedir tarjeta** (menos fricción, más registros); al terminar el usuario elige plan y, si no elige, no se cobra nada. Sin permanencia; cambio de plan con prorrateo desde el Customer Portal.
 - Los límites viven en `plans.features` (JSON) y se cambian sin desplegar. Precios anuales: `STRIPE_PRICE_CORE_ANNUAL`, `STRIPE_PRICE_PRO_ANNUAL`; `subscriptions.billing_interval` guarda mes o año.
 - Al agotar los mensajes del copiloto en Core, aviso amable con opción de pasar a Pro; nunca se bloquea el resto de la app.
 - Cuentas: tabla `trading_accounts` (tipo personal/fondeo/demo, capital y reglas de la prueba en %). Cada entrada del journal apunta a su cuenta.
