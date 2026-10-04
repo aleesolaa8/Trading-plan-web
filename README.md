@@ -10,8 +10,9 @@ SaaS de planificación y registro para traders: diagnóstico, plan escrito con t
 |---|---|
 | 1. Arquitectura y esquema SQL | Hecho · [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) |
 | 2. Auth, layout y sistema de diseño | Hecho |
-| 3. Landing, diagnóstico y onboarding | Siguiente |
-| 4–8 | Pendientes |
+| 3. Landing, diagnóstico y onboarding | Hecho |
+| 4. Plan con IA, protocolos, versiones y copiloto | Siguiente |
+| 5–8 | Pendientes |
 
 ## Arrancar en local
 
@@ -42,6 +43,10 @@ npm run build
 - `src/components/layout`: cabecera fija con menú a pantalla completa, cinta en bucle, franja de cifras, pie con aviso legal
 - `src/components/app`: estructura del panel privado (menú lateral en escritorio, barra inferior en móvil)
 - `src/app/(auth)`: registro con aceptación del aviso de riesgo, entrada, recuperar y nueva contraseña
+- `src/app/(marketing)/page.tsx` + `src/components/landing`: portada (precios y diagnóstico leídos de la base de datos)
+- `src/app/panel/diagnostico`: diagnóstico de 7 preguntas, reglas y creación del plan
+- `src/app/panel/plan`: plan, checklist, protocolos editables y "Mi día"
+- `src/lib/domain`: lógica pura y probada (reglas, checklist, semana propuesta, mercados, horas)
 - `src/app/panel`: zona privada protegida por sesión
 - `src/proxy.ts`: refresca la sesión y protege `/panel`
 - `supabase/`: esquema con RLS y contenido editable del diagnóstico

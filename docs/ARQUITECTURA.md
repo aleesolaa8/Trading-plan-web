@@ -1,6 +1,6 @@
 # Time to Trade · Plan de arquitectura
 
-> Estado: **aprobado** (paso 1). Paso 2 terminado: auth, layout y sistema de diseño.
+> Estado: pasos 1, 2 y 3 terminados. Siguiente: paso 4 (plan con IA, versiones y copiloto).
 > Prioridad: este documento sigue el *Prompt v2*; el brief maestro, el prototipo HTML y las capturas de Gotoyou **no llegaron adjuntos** y hay que revisarlos contra este plan cuando estén.
 
 ---
@@ -306,7 +306,7 @@ Para comprobar RLS: crea dos usuarios, inserta una entrada de journal con el pri
 ## 10. Qué falta (siguientes pasos)
 
 2. ~~Auth, layout y sistema de diseño~~ **hecho**.
-3. Landing, diagnóstico explicativo y onboarding.
+3. ~~Landing, diagnóstico explicativo y onboarding~~ **hecho**: el onboarding se guarda en una sola transacción con `complete_onboarding()` (migración 0002).
 4. Generador de plan con IA, protocolos, versiones y **copiloto 24 h**.
 5. Calendario con bloques movibles.
 6. Calculadora, checklist y journal con patrones.

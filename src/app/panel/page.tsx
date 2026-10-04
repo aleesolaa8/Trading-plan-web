@@ -28,8 +28,21 @@ export default async function PanelHome() {
           </h2>
           <p className="muted">Con tus respuestas construimos tu plan, tu calendario y tus protocolos. Son unos 3 minutos.</p>
           <div>
-            <ButtonLink href="/panel/plan" arrow>
+            <ButtonLink href="/panel/diagnostico" arrow>
               Empezar diagnóstico
+            </ButtonLink>
+          </div>
+        </section>
+      )}
+      {profile?.onboarding_done && (
+        <section className="card" style={{ display: 'grid', gap: 16, maxWidth: 720, marginBottom: 16 }}>
+          <span className="chip">Tu plan está listo</span>
+          <h2 style={{ fontSize: 'clamp(24px, 3.4vw, 32px)', letterSpacing: '-0.035em', lineHeight: 1.1 }}>
+            Repasa tu plan y tu checklist antes de operar
+          </h2>
+          <div>
+            <ButtonLink href="/panel/plan" arrow>
+              Ver mi plan
             </ButtonLink>
           </div>
         </section>

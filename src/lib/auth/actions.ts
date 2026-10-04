@@ -49,14 +49,14 @@ export async function signUp(_: FormState, fd: FormData): Promise<FormState> {
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
-      emailRedirectTo: `${siteUrl()}/auth/callback?next=/panel`,
+      emailRedirectTo: `${siteUrl()}/auth/callback?next=/panel/diagnostico`,
       data: { display_name: parsed.data.name, disclaimer_accepted_at: new Date().toISOString() },
     },
   })
   if (error) return { message: authErrorMessage(error.message), values }
 
   // Con confirmación de email desactivada, Supabase ya devuelve sesión.
-  if (data.session) redirect('/panel')
+  if (data.session) redirect('/panel/diagnostico')
   return {
     ok: true,
     message: `Te hemos enviado un enlace a ${parsed.data.email}. Ábrelo para activar tu cuenta.`,

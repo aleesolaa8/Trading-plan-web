@@ -13,6 +13,7 @@ const LINKS = [
   { href: '/#diagnostico', label: 'Diagnóstico' },
   { href: '/#herramientas', label: 'Herramientas' },
   { href: '/#precio', label: 'Precio' },
+  { href: '/#faq', label: 'Preguntas' },
 ]
 
 export function Header({ signedIn }: { signedIn: boolean }) {
