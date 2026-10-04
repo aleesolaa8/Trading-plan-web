@@ -462,3 +462,26 @@ ul.arrows li::before {
     scroll-behavior: auto !important;
   }
 }
+
+@media print {
+  :root {
+    --bg: #fff;
+    --bg-2: #f6f7f7;
+    --card: #fff;
+    --card-2: #fff;
+    --text: #0a1015;
+    --muted: #4a545d;
+    --line: #d9dfdc;
+    --line-2: #c5ceca;
+    --green: #08995a;
+    --red: #c02a3f;
+    --grad-text: linear-gradient(135deg, #067a48, #0aa862);
+    color-scheme: light;
+  }
+  .bg-grid {
+    display: none;
+  }
+  body {
+    background: #fff;
+  }
+}

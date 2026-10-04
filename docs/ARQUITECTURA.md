@@ -1,6 +1,6 @@
 # Time to Trade · Plan de arquitectura
 
-> Estado: pasos 1 a 4 terminados. Siguiente: paso 5 (calendario con bloques movibles).
+> Estado: pasos 1 a 8 terminados, con plan Free. Pendiente: «Sobre nosotros», textos legales revisados por un profesional y puesta en producción.
 > Prioridad: este documento sigue el *Prompt v2*; el brief maestro, el prototipo HTML y las capturas de Gotoyou **no llegaron adjuntos** y hay que revisarlos contra este plan cuando estén.
 
 ---
@@ -315,7 +315,32 @@ Para comprobar RLS: crea dos usuarios, inserta una entrada de journal con el pri
 2. ~~Auth, layout y sistema de diseño~~ **hecho**.
 3. ~~Landing, diagnóstico explicativo y onboarding~~ **hecho**: el onboarding se guarda en una sola transacción con `complete_onboarding()` (migración 0002).
 4. ~~Generador de plan con IA, protocolos, versiones y copiloto 24 h~~ **hecho** (migración 0003: cupos de IA).
-5. Calendario con bloques movibles.
-6. Calculadora, checklist y journal con patrones.
-7. Dashboard y revisión semanal con IA.
-8. Stripe y control de acceso.
+5. ~~Calendario con bloques movibles~~ **hecho**: arrastrar (ratón), flechas (móvil y teclado), avisos de solape, pantalla y fuera de sesión.
+6. ~~Calculadora, checklist y journal con patrones~~ **hecho**: cuentas personal/fondeo/demo, modo fondeo, capturas privadas, revisión de capturas con IA (Pro), CSV.
+7. ~~Dashboard y revisión semanal con IA~~ **hecho**: más informe mensual imprimible en PDF (Pro).
+8. ~~Stripe y control de acceso~~ **hecho** (migración 0004): ver §7 quater.
+
+
+## 7 quater. Planes, acceso y pagos (pasos 5–8)
+
+**Plan que aplica** (`current_plan()`): suscripción activa o con pago pendiente (3 días de gracia) → prueba de Pro de 7 días desde el registro (sin tarjeta) → **Free** para siempre. Nadie se queda sin acceso: al acabar la prueba o cancelar, pasa a Free y conserva sus datos.
+
+| Límite (`plans.features`) | Free | Core | Pro |
+|---|---|---|---|
+| Entradas de journal al mes | 30 | sin límite | sin límite |
+| Copiloto, mensajes al mes | 10 | 40 | sin límite (tope técnico 1.500) |
+| Redacciones del plan con IA | 1 | 3 | 20 |
+| Patrones y resumen semanal | — | sí | sí |
+| Revisión semanal con IA | — | — | 8 al mes |
+| Revisión de capturas con IA | — | — | 60 al mes |
+| Estadísticas avanzadas, informe PDF, modo fondeo | — | — | sí |
+| Cuentas activas | 1 | 1 | 3 |
+| Exportar CSV | — | sí | sí |
+
+Los límites que importan se comprueban **en la base de datos**: trigger `journal_limit`, trigger `account_rules` (número de cuentas y fondeo), `consume_ai_quota()` para la IA. La interfaz solo los muestra (`my_access()`).
+
+**Stripe**: Checkout (suscripción mensual o anual, IVA con Stripe Tax, NIF para empresas, cupones) → webhook firmado e idempotente (`stripe_events`) que guarda la suscripción con `event_created` para que un evento antiguo no pise uno nuevo. Un precio que no es nuestro no da acceso. Cambios de plan, tarjeta, facturas y cancelación en el portal de cliente de Stripe. PayPal, Apple Pay y Google Pay se activan en el panel de Stripe, sin código.
+
+**Borrar cuenta**: Ajustes → cancela la suscripción, borra capturas y elimina el usuario (todo lo demás se borra en cascada).
+
+**Recordatorios**: avisos del navegador 10 minutos antes de cada bloque de trading y al llegar al límite diario, con la app abierta (pestaña o app instalada). Para avisos con la app cerrada hará falta Web Push (siguiente iteración).

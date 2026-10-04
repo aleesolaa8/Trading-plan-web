@@ -4,9 +4,22 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { signOut } from '@/lib/auth/actions'
 import { AppNav } from './AppNav'
 import { Copilot } from './Copilot'
+import { Reminders } from './Reminders'
 import styles from './AppShell.module.css'
 
-export function AppShell({ name, email, children }: { name: string; email: string | null; children: React.ReactNode }) {
+export function AppShell({
+  name,
+  email,
+  reminders,
+  timezone,
+  children,
+}: {
+  name: string
+  email: string | null
+  reminders: { title: string; start: number }[]
+  timezone: string
+  children: React.ReactNode
+}) {
   return (
     <div className={styles.shell}>
       <aside className={styles.side}>
@@ -46,6 +59,7 @@ export function AppShell({ name, email, children }: { name: string; email: strin
       </main>
       <AppNav variant="bottom" />
       <Copilot name={name} />
+      <Reminders blocks={reminders} timezone={timezone} />
     </div>
   )
 }

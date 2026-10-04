@@ -1,0 +1,23 @@
+.report {
+  display: grid;
+  gap: 4px;
+}
+.head {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.head h1 {
+  font-size: clamp(36px, 5vw, 60px);
+  text-transform: none;
+}
+.head h1 span {
+  text-transform: capitalize;
+}
+@media print {
+  .report :global(.card) {
+    break-inside: avoid;
+    background: #fff;
+    border-color: #ccc;
+  }
+}

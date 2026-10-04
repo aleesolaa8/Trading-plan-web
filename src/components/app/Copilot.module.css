@@ -255,3 +255,10 @@
 .win[hidden] {
   display: none;
 }
+
+@media print {
+  .fab,
+  .win {
+    display: none !important;
+  }
+}

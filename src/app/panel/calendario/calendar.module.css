@@ -1,0 +1,350 @@
+.toolbar {
+  margin-bottom: 14px;
+}
+.hint {
+  font-size: 13px;
+  flex: 1 1 260px;
+}
+.cal {
+  padding: 0;
+  overflow: hidden;
+}
+.head {
+  display: grid;
+  grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line);
+  background: var(--card-2);
+}
+.dh {
+  display: grid;
+  gap: 2px;
+  padding: 12px 8px;
+  text-align: center;
+  border-left: 1px solid var(--line);
+  min-width: 0;
+}
+.dh b {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.dh small {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.isToday b {
+  color: var(--green);
+}
+.over {
+  color: var(--amber) !important;
+  font-weight: 800;
+}
+.scroll {
+  max-height: min(70dvh, 760px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+}
+.gutter {
+  position: relative;
+}
+.gutter span {
+  position: absolute;
+  right: 8px;
+  transform: translateY(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.gutter span:first-child {
+  transform: none;
+}
+.col {
+  position: relative;
+  border-left: 1px solid var(--line);
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--h) - 1px),
+    var(--line) calc(var(--h) - 1px),
+    var(--line) var(--h)
+  );
+  cursor: copy;
+}
+.colToday {
+  background-color: color-mix(in srgb, var(--green) 4%, transparent);
+}
+.now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  height: 2px;
+  background: var(--red);
+  box-shadow: 0 0 10px var(--red);
+  pointer-events: none;
+}
+.now::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--red);
+}
+.block {
+  --c: var(--muted);
+  --s: color-mix(in srgb, var(--muted) 14%, transparent);
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 8px 8px;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  border-left: 3px solid var(--c);
+  background: color-mix(in srgb, var(--card) 70%, var(--s));
+  background-image: linear-gradient(var(--s), var(--s));
+  cursor: grab;
+  user-select: none;
+  transition:
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+.block:hover {
+  z-index: 2;
+  box-shadow: 0 6px 20px -8px var(--c);
+}
+.block > * {
+  flex-shrink: 0;
+}
+.block b {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.block small {
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.short {
+  flex-direction: row;
+  align-items: center;
+  padding-block: 1px;
+}
+.short b,
+.mid b {
+  -webkit-line-clamp: 1;
+}
+.dragging {
+  z-index: 4;
+  cursor: grabbing;
+  transform: scale(1.02);
+  box-shadow: 0 14px 34px -10px var(--c);
+  transition: none;
+}
+.resize {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 8px;
+  cursor: ns-resize;
+}
+.resize::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 22px;
+  height: 3px;
+  margin-left: -11px;
+  border-radius: 3px;
+  background: var(--c);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.block:hover .resize::after {
+  opacity: 0.8;
+}
+
+.t_trading {
+  --c: var(--green);
+  --s: var(--green-soft);
+}
+.t_analisis,
+.t_backtesting,
+.t_formacion,
+.t_revision {
+  --c: var(--amber);
+  --s: var(--amber-soft);
+}
+.t_comida,
+.t_ejercicio,
+.t_sueno,
+.t_pausa {
+  --c: var(--blue);
+  --s: var(--blue-soft);
+}
+.t_personal {
+  --c: #a98bff;
+  --s: rgba(169, 139, 255, 0.14);
+}
+.t_desconexion,
+.t_otro {
+  --c: var(--muted);
+  --s: color-mix(in srgb, var(--muted) 14%, transparent);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 14px 4px 18px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.legend i {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--c);
+}
+.warns {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+.warns li {
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+}
+.wRed {
+  background: var(--red-soft);
+}
+.wAmber {
+  background: var(--amber-soft);
+}
+
+.dayTabs {
+  display: none;
+}
+.arrows {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.arrows .field-label,
+.arrows > div > span {
+  display: block;
+  margin-bottom: 8px;
+}
+.days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border: 0;
+}
+.days legend {
+  width: 100%;
+  margin-bottom: 8px;
+}
+.days label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--line-2);
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+}
+.days label:has(input:checked) {
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--green);
+}
+.days input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.days label:has(input:focus-visible) {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+.daysQuick {
+  min-height: 42px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* Móvil: un día cada vez, con pestañas */
+@media (max-width: 899px) {
+  .dayTabs {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .dayTabs button {
+    min-height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .dayTabs [aria-selected='true'] {
+    background: var(--grad);
+    color: var(--green-ink);
+    border-color: transparent;
+  }
+  .tabToday:not([aria-selected='true']) {
+    color: var(--green);
+    border-color: color-mix(in srgb, var(--green) 40%, var(--line));
+  }
+  .head,
+  .grid {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+  .hideM {
+    display: none;
+  }
+  .block b {
+    font-size: 14px;
+  }
+  .block small {
+    font-size: 12px;
+  }
+}

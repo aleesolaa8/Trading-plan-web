@@ -30,12 +30,13 @@ export const FAQ: FaqGroup[] = [
     id: 'planes',
     title: 'Planes y pagos',
     items: [
-      { q: '¿Qué diferencia hay entre Core y Pro?', a: 'Con Core tienes todo para operar con un plan: diagnóstico, plan, calendario, calculadora, checklist, journal con patrones y recordatorios. Pro suma el copiloto con IA sin límite, las revisiones escritas por IA, estadísticas avanzadas y hasta 3 cuentas, por ejemplo tu cuenta personal y una de fondeo.' },
-      { q: '¿Cómo funciona la prueba gratis?', a: 'Tienes 7 días con todo Pro incluido y sin poner tarjeta. Al terminar eliges el plan que quieras. Si no eliges ninguno, no se cobra nada.' },
+      { q: '¿Hay un plan gratis?', a: 'Sí. El plan Free es gratis para siempre: diagnóstico, plan con tus reglas, protocolos, checklist, calendario, calculadora, 30 entradas de journal al mes y 10 mensajes al mes con el copiloto. Sin tarjeta.' },
+      { q: '¿Qué diferencia hay entre Core y Pro?', a: 'Con Core tienes todo para operar con un plan: journal ilimitado con patrones, resumen semanal, 40 mensajes al mes con el copiloto y exportar tus datos. Pro suma el copiloto con IA sin límite, las revisiones escritas por IA, estadísticas avanzadas y hasta 3 cuentas, por ejemplo tu cuenta personal y una de fondeo.' },
+      { q: '¿Cómo funciona la prueba gratis?', a: 'Al registrarte tienes 7 días con todo Pro incluido y sin poner tarjeta. Al terminar eliges el plan que quieras; si no eliges ninguno, sigues en Free, gratis y sin perder tus datos.' },
       { q: '¿Puedo cambiar de plan o cancelar?', a: 'Sí, cuando quieras y desde tu cuenta. No hay permanencia. Si pasas a Pro, el cambio es inmediato y solo pagas la diferencia proporcional.' },
       { q: '¿Qué ventaja tiene el pago anual?', a: 'Pagas 10 meses y tienes 12.' },
       { q: '¿Recibo factura? ¿Lleva IVA?', a: 'Sí. Recibes factura por email en cada pago, con el IVA desglosado según tu país. Sirve para autónomos y empresas.' },
-      { q: '¿Qué formas de pago aceptáis?', a: 'Tarjeta de débito o crédito y otros métodos habituales según tu país. El pago lo gestiona Stripe, una plataforma de pagos segura; nosotros nunca vemos los datos de tu tarjeta.' },
+      { q: '¿Qué formas de pago aceptáis?', a: 'Tarjeta de débito o crédito, PayPal, Apple Pay y Google Pay, según tu país. El pago lo gestiona Stripe, una plataforma de pagos segura; nosotros nunca vemos los datos de tu tarjeta.' },
     ],
   },
   {

@@ -75,7 +75,7 @@ export async function getQuiz(): Promise<QuizQuestion[]> {
 }
 
 export type PlanTier = {
-  id: 'core' | 'pro'
+  id: 'free' | 'core' | 'pro'
   name: string
   monthly: number | null
   annual: number | null
@@ -90,7 +90,7 @@ export async function getPlans(): Promise<PlanTier[]> {
     .from('plans')
     .select('id, name, price_cents, price_cents_annual, trial_days, features, sort_order')
     .eq('is_active', true)
-    .in('id', ['core', 'pro'])
+    .in('id', ['free', 'core', 'pro'])
     .order('sort_order')
   return (data ?? []).map((p) => ({
     id: p.id as PlanTier['id'],

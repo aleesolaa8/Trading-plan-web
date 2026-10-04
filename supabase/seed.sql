@@ -5,20 +5,27 @@
 -- PENDIENTE: revisión humana de todos los textos antes de producción.
 -- =====================================================================
 
--- Planes: Core (14,99 € + IVA/mes o 149,90 €/año) y Pro (24,99 € + IVA/mes o 249,90 €/año).
--- El precio real se lee de Stripe (STRIPE_PRICE_CORE / STRIPE_PRICE_PRO); price_cents es caché.
+-- Planes: Free (0 €, para siempre), Core (14,99 € + IVA/mes o 149,90 €/año) y Pro (24,99 € + IVA/mes o 249,90 €/año).
+-- Al registrarse: 7 días de Pro sin tarjeta; después, Free hasta que elija un plan de pago.
+-- El precio real se lee de Stripe (STRIPE_PRICE_*); price_cents es caché para mostrarlo.
 -- features decide qué ve cada plan: cambiar un límite no requiere desplegar.
+-- Una clave ausente o null = sin límite (p. ej. journal_entries_per_month en Core y Pro).
 insert into public.plans (id, name, is_active, price_cents, price_cents_annual, trial_days, features, sort_order) values
-  ('free',    'Free',    false, null, null, 0,
-   '{"ai_plan_generations":1,"copilot_messages_per_month":0}', 0),
+  ('free',    'Free',    true,  0, 0, 0,
+   '{"ai_plan_generations":1,"copilot_messages_per_month":10,"journal_entries_per_month":30,
+     "max_accounts":1,"patterns":false,"weekly_summary":false,"ai_reviews_per_month":0,
+     "ai_screenshot_reviews_per_month":0,"advanced_stats":false,"funded_mode":false,
+     "reminders":true,"export_csv":false,"pdf_reports":false}', 0),
   ('core',    'Core',    true,  1499, 14990, 7,
-   '{"ai_plan_generations":3,"copilot_messages_per_month":40,"ai_weekly_review":false,
-     "ai_screenshot_review":false,"advanced_stats":false,"funded_mode":false,
-     "max_accounts":1,"reminders":true,"export_csv":true,"pdf_reports":false}', 1),
+   '{"ai_plan_generations":3,"copilot_messages_per_month":40,
+     "max_accounts":1,"patterns":true,"weekly_summary":true,"ai_reviews_per_month":0,
+     "ai_screenshot_reviews_per_month":0,"advanced_stats":false,"funded_mode":false,
+     "reminders":true,"export_csv":true,"pdf_reports":false}', 1),
   ('pro',     'Pro',     true,  2499, 24990, 7,
-   '{"ai_plan_generations":20,"copilot_messages_per_month":1500,"ai_weekly_review":true,
-     "ai_screenshot_review":true,"advanced_stats":true,"funded_mode":true,
-     "max_accounts":3,"reminders":true,"export_csv":true,"pdf_reports":true}', 2),
+   '{"ai_plan_generations":20,"copilot_messages_per_month":1500,
+     "max_accounts":3,"patterns":true,"weekly_summary":true,"ai_reviews_per_month":8,
+     "ai_screenshot_reviews_per_month":60,"advanced_stats":true,"funded_mode":true,
+     "reminders":true,"export_csv":true,"pdf_reports":true}', 2),
   ('premium', 'Premium', false, null, null, 7, '{}', 3)
 on conflict (id) do update set name = excluded.name, is_active = excluded.is_active,
   price_cents = excluded.price_cents, price_cents_annual = excluded.price_cents_annual,

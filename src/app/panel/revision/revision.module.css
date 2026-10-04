@@ -1,0 +1,88 @@
+.weekNav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.weekNav b {
+  font-size: 17px;
+  text-transform: capitalize;
+}
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.day {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 0;
+  text-align: center;
+}
+.day b {
+  font-size: 14px;
+  white-space: nowrap;
+}
+.day small {
+  font-size: 12px;
+  font-weight: 700;
+}
+.barWrap {
+  position: relative;
+  width: 100%;
+  max-width: 44px;
+  height: 120px;
+  border-radius: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.barWrap::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--line-2);
+}
+.barWrap i {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  max-height: 50%;
+  border-radius: 6px;
+}
+.up {
+  bottom: 50%;
+  background: var(--grad);
+}
+.down {
+  top: 50%;
+  background: var(--red);
+}
+.ai {
+  display: grid;
+  gap: 18px;
+}
+.ai h3 {
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+.lede {
+  font-size: clamp(17px, 2vw, 19px);
+  line-height: 1.55;
+}
+.mejora {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--green) 40%, var(--line));
+  background: var(--green-soft);
+}
+.mejora h3 {
+  margin: 0;
+}
