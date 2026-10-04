@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trading Plan · Vista previa</title>
+<meta name="description" content="Vista previa del sistema de diseño de Trading Plan: plan, disciplina y journal para traders.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   TOKENS · Paleta "Terminal" (oscuro por defecto)
+   ========================================================= */
+:root{
+  --bg:#05070a; --bg-2:#080c11;
+  --card:#0d1218; --card-2:#121922;
+  --line:#1d2631; --line-2:#2a3542;
+  --text:#eef2f6; --muted:#8a95a3;
+  --green:#1fe08c; --green-ink:#03160c; --green-soft:rgba(31,224,140,.12);
+  --grad:linear-gradient(135deg,#12d27f 0%,#6ceaa9 50%,#d2f8c4 100%);
+  --blue:#4d8dff; --blue-soft:rgba(77,141,255,.12);
+  --red:#ff5468; --red-soft:rgba(255,84,104,.12);
+  --amber:#ffb547; --amber-soft:rgba(255,181,71,.12);
+  --glow:0 0 0 1px rgba(31,224,140,.55),0 12px 44px -10px rgba(31,224,140,.75);
+  --grid:rgba(255,255,255,.035);
+  --r-card:28px; --r-btn:14px;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f5f7f6; --bg-2:#eef2f0;
+  --card:#ffffff; --card-2:#f3f6f5;
+  --line:#e1e7e4; --line-2:#cdd6d2;
+  --text:#0a1015; --muted:#56616b;
+  --green:#08995a; --green-ink:#03160c; --green-soft:rgba(8,153,90,.10);
+  --blue:#2f6fe8; --blue-soft:rgba(47,111,232,.10);
+  --red:#d92f45; --red-soft:rgba(217,47,69,.08);
+  --amber:#b86e00; --amber-soft:rgba(184,110,0,.10);
+  --glow:0 0 0 1px rgba(8,153,90,.35),0 12px 34px -12px rgba(8,153,90,.55);
+  --grid:rgba(10,16,21,.05);
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1,"cv11" 1}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1180px,100% - 32px);margin-inline:auto}
+
+/* Textura: rejilla de gráfico + resplandor */
+.bg-grid{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(900px 520px at 78% -8%,rgba(31,224,140,.16),transparent 60%),
+    radial-gradient(700px 400px at 0% 10%,rgba(77,141,255,.08),transparent 60%),
+    linear-gradient(var(--grid) 1px,transparent 1px) 0 0/56px 56px,
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/56px 56px;
+  -webkit-mask-image:linear-gradient(#000 0%,#000 55%,transparent 100%);mask-image:linear-gradient(#000 0%,#000 55%,transparent 100%)}
+:root[data-theme="light"] .bg-grid{background:
+    radial-gradient(900px 520px at 78% -8%,rgba(8,153,90,.12),transparent 60%),
+    linear-gradient(var(--grid) 1px,transparent 1px) 0 0/56px 56px,
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/56px 56px}
+
+/* Tipografía */
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 12px var(--blue)}
+.dot.g{background:var(--green);box-shadow:0 0 12px var(--green)}
+h1,h2,h3{font-weight:900;letter-spacing:-.04em;line-height:.98}
+h1{font-size:clamp(44px,6.2vw,84px)}
+h2{font-size:clamp(34px,5.6vw,64px)}
+h3{font-size:22px;letter-spacing:-.025em;line-height:1.15;font-weight:800}
+.hl{color:var(--green)}
+.hl-grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:clamp(17px,2vw,20px);color:var(--muted);max-width:56ch}
+.muted{color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);font-size:13px;font-weight:600}
+
+/* =========================================================
+   BOTONES · lo más llamativo de la página
+   ========================================================= */
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:0 28px;border-radius:var(--r-btn);font-weight:800;font-size:16px;letter-spacing:-.01em;white-space:nowrap;isolation:isolate;overflow:hidden;transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s,background .2s,border-color .2s}
+.btn .arr{display:inline-block;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.btn:hover .arr{transform:translateX(5px)}
+.btn-primary{background:var(--grad);color:var(--green-ink);box-shadow:var(--glow)}
+.btn-primary::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.75) 50%,transparent 70%);transform:translateX(-120%);animation:shine 3.8s ease-in-out infinite}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(31,224,140,.8),0 18px 60px -10px rgba(31,224,140,.95)}
+.btn-primary:active{transform:translateY(0) scale(.98)}
+.btn-ghost{border:1px solid var(--line-2);background:color-mix(in srgb,var(--card) 70%,transparent);backdrop-filter:blur(8px)}
+.btn-ghost:hover{border-color:var(--green);color:var(--green);transform:translateY(-2px)}
+.btn-sm{min-height:44px;padding:0 18px;font-size:15px}
+.btn-xl{min-height:64px;padding:0 36px;font-size:18px}
+@keyframes shine{0%,55%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
+
+/* =========================================================
+   CABECERA + MENÚ
+   ========================================================= */
+.header{position:fixed;inset:0 0 auto;z-index:50;transition:background .3s,border-color .3s;border-bottom:1px solid transparent}
+.header.scrolled{background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(14px) saturate(1.4);border-color:var(--line)}
+.header .wrap{display:flex;align-items:center;gap:12px;height:72px}
+.logo{display:flex;align-items:center;gap:10px;white-space:nowrap;font-weight:900;letter-spacing:-.04em;font-size:20px;margin-right:auto}
+.logo-mark{width:34px;height:34px;border-radius:10px;background:var(--grad);display:grid;place-items:center;box-shadow:0 6px 24px -6px rgba(31,224,140,.7)}
+.nav{display:none;gap:28px;font-size:15px;font-weight:600;color:var(--muted);margin-right:12px}
+.nav a:hover{color:var(--text)}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line-2);display:grid;place-items:center;background:var(--card);transition:border-color .2s}
+.icon-btn:hover{border-color:var(--green)}
+.burger i{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;transition:transform .3s,opacity .3s}
+.burger i+i{margin-top:5px}
+.menu-open .burger i:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.menu-open .burger i:nth-child(2){opacity:0}
+.menu-open .burger i:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+#theme{display:none}
+.menu-theme{margin-top:24px;align-self:flex-start}
+@media(min-width:600px){#theme{display:grid}.menu-theme{display:none}}
+.menu{position:fixed;inset:0;z-index:40;background:var(--bg);padding:110px 16px 32px;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
+.menu-open .menu{opacity:1;visibility:visible}
+.menu nav{display:flex;flex-direction:column;gap:6px}
+.menu nav a{font-size:clamp(36px,9vw,64px);font-weight:900;letter-spacing:-.04em;line-height:1.1;display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);transform:translateY(16px);opacity:0;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s,color .2s}
+.menu nav a:hover{color:var(--green)}
+.menu-open .menu nav a{transform:none;opacity:1}
+.menu nav a:nth-child(2){transition-delay:.04s}.menu nav a:nth-child(3){transition-delay:.08s}.menu nav a:nth-child(4){transition-delay:.12s}.menu nav a:nth-child(5){transition-delay:.16s}
+.menu .btn-xl{margin-top:auto}
+@media(max-width:420px){.header .btn-sm{padding:0 14px}.logo{font-size:18px}}
+@media(min-width:960px){.nav{display:flex}}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+.hero{padding:132px 0 56px}
+.hero-grid{display:grid;gap:48px;align-items:center}
+.hero h1{margin:22px 0 22px}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.hero .ctas .btn{flex:1 1 220px}
+.trust{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:22px;font-size:14px;color:var(--muted);font-weight:600}
+.trust span::before{content:"→ ";color:var(--green);font-weight:800}
+@media(min-width:960px){.hero{padding:168px 0 80px}.hero-grid{grid-template-columns:1.05fr .95fr}.hero .ctas .btn{flex:0 0 auto}}
+
+/* Visual del hero */
+.terminal{position:relative;border-radius:var(--r-card);border:1px solid var(--line-2);background:linear-gradient(180deg,var(--card-2),var(--card));padding:18px;box-shadow:0 40px 120px -40px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.04)}
+.term-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.term-top b{font-size:14px}
+.chip{width:fit-content;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:999px;background:var(--green-soft);color:var(--green)}
+.chip.blue{background:var(--blue-soft);color:var(--blue)}
+.chip.red{background:var(--red-soft);color:var(--red)}
+.chip.amber{background:var(--amber-soft);color:var(--amber)}
+.term-top .chip:last-child{margin-left:auto}
+.chart{width:100%;height:auto;display:block;border-radius:16px;background:var(--bg-2);border:1px solid var(--line)}
+.lvl-label{font:800 10px Inter,system-ui,sans-serif;letter-spacing:.08em}
+.float{position:absolute;border-radius:18px;border:1px solid var(--line-2);background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:blur(14px);padding:12px 14px;box-shadow:0 20px 50px -20px rgba(0,0,0,.7);font-size:13px;animation:bob 6s ease-in-out infinite}
+.float b{display:block;font-size:15px;letter-spacing:-.02em}
+.float{max-width:calc(100% - 16px)}
+.float.f1{left:-14px;bottom:56px}
+.float.f2{right:-10px;top:68px;animation-delay:-3s}
+.caption{font-size:11px;color:var(--muted);margin-top:10px;text-align:right}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@media(max-width:600px){.floats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.float{position:static;max-width:none;animation:none}}
+
+/* =========================================================
+   CINTA EN BUCLE
+   ========================================================= */
+.ticker{border-block:1px solid var(--line);background:var(--bg-2);overflow:hidden;padding:18px 0}
+.ticker-track{display:flex;width:max-content;animation:marquee 38s linear infinite}
+.ticker:hover .ticker-track{animation-play-state:paused}
+.ticker-group{display:flex;align-items:center;gap:36px;padding-right:36px;font-size:15px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+@keyframes marquee{to{transform:translateX(-50%)}}
+
+/* =========================================================
+   FRANJA DE CIFRAS (degradado)
+   ========================================================= */
+.stats{margin:88px auto;border-radius:var(--r-card);background:var(--grad);color:var(--green-ink);padding:36px 28px;display:grid;grid-template-columns:repeat(2,1fr);gap:28px 20px;position:relative;overflow:hidden}
+.stats::after{content:"";position:absolute;inset:0;background:linear-gradient(var(--green-ink) 1px,transparent 1px) 0 0/40px 40px;opacity:.05;pointer-events:none}
+.stat strong{display:block;font-size:clamp(44px,7vw,76px);font-weight:900;letter-spacing:-.05em;line-height:1}
+.stat span{font-size:14px;font-weight:600;display:block;margin-top:8px;max-width:22ch}
+@media(min-width:860px){.stats{grid-template-columns:repeat(4,1fr);padding:48px}}
+
+/* =========================================================
+   SECCIONES / TARJETAS
+   ========================================================= */
+section{scroll-margin-top:80px}
+.sec{padding:72px 0}
+.sec-head{display:grid;gap:18px;margin-bottom:44px;max-width:780px}
+.card{border-radius:var(--r-card);border:1px solid var(--line);background:linear-gradient(180deg,var(--card-2),var(--card));padding:28px;position:relative;transition:border-color .3s,transform .3s}
+.card:hover{border-color:var(--line-2)}
+.steps{display:grid;gap:16px}
+.step-n{font-size:13px;font-weight:900;letter-spacing:.14em;color:var(--green);margin-bottom:30px;display:flex;align-items:center;gap:10px}
+.step-n::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,var(--line-2),transparent)}
+.card p{color:var(--muted);margin-top:10px}
+.card .q-title{color:var(--text)}
+@media(min-width:860px){.steps{grid-template-columns:repeat(3,1fr)}}
+
+ul.arrows{list-style:none;display:grid;gap:10px;margin-top:18px}
+ul.arrows li{padding-left:28px;position:relative}
+ul.arrows li::before{content:"→";position:absolute;left:0;color:var(--green);font-weight:900}
+ul.crosses li::before{content:"×";color:var(--red);font-size:20px;line-height:1.2}
+
+/* Diagnóstico interactivo */
+.quiz{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+.quiz>*,.proto>div{min-width:0}
+.q-progress{display:flex;gap:6px;margin-bottom:22px}
+.q-progress i{height:4px;flex:1;border-radius:4px;background:var(--line-2)}
+.q-progress i.on{background:var(--green)}
+.q-title{font-size:clamp(24px,3.4vw,34px);font-weight:900;letter-spacing:-.035em;line-height:1.1;margin:12px 0 22px}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;padding:16px 18px;border-radius:16px;border:1px solid var(--line-2);background:var(--bg-2);font-weight:600;display:flex;align-items:center;gap:14px;transition:border-color .2s,background .2s,transform .15s}
+.opt:hover{border-color:var(--green);transform:translateX(3px)}
+.opt .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);flex:none;transition:all .2s}
+.opt[aria-pressed="true"]{border-color:var(--green);background:var(--green-soft)}
+.opt[aria-pressed="true"] .radio{border-color:var(--green);background:var(--green);box-shadow:inset 0 0 0 3px var(--bg-2)}
+.explain{display:grid;gap:12px;opacity:.35;transition:opacity .4s}
+.explain.on{opacity:1}
+.tip{border-radius:20px;padding:20px 22px;border:1px solid var(--line)}
+.tip.why{background:var(--blue-soft);border-color:color-mix(in srgb,var(--blue) 35%,transparent)}
+.tip.plan{background:var(--green-soft);border-color:color-mix(in srgb,var(--green) 35%,transparent)}
+.tip h4{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px}
+.tip.why h4{color:var(--blue)} .tip.plan h4{color:var(--green)}
+.proto{display:flex;align-items:center;gap:12px;border:1px dashed var(--line-2);border-radius:16px;padding:14px 16px;font-size:14px}
+.proto b{display:block}
+@media(min-width:900px){.quiz{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:start}}
+
+/* Bento de funcionalidades */
+.bento{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.bento>*{min-width:0}
+.bento .card{display:flex;flex-direction:column}
+.bento .demo{margin-top:22px;border-radius:18px;background:var(--bg-2);border:1px solid var(--line);padding:16px;flex:1}
+@media(min-width:900px){.bento{grid-template-columns:repeat(6,1fr)}.b-calc{grid-column:span 3}.b-journal{grid-column:span 3}.b-cal{grid-column:span 4}.b-plan{grid-column:span 2}}
+
+/* Calculadora */
+.calc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.field{display:grid;gap:6px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select{font:600 16px Inter,system-ui,sans-serif;color:var(--text);background:var(--card);border:1px solid var(--line-2);border-radius:12px;padding:11px 12px;width:100%;min-width:0;transition:border-color .2s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+.field.full{grid-column:1/-1}
+.result{grid-column:1/-1;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-radius:16px;padding:16px 18px;background:var(--green-soft);border:1px solid color-mix(in srgb,var(--green) 40%,transparent)}
+.result strong{font-size:40px;font-weight:900;letter-spacing:-.05em;line-height:1;color:var(--green)}
+.result small{display:block;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.warns{grid-column:1/-1;display:grid;gap:8px}
+.warn{font-size:14px;padding:10px 14px;border-radius:12px;background:var(--amber-soft);color:var(--amber);font-weight:600}
+.warn.red{background:var(--red-soft);color:var(--red)}
+
+/* Calendario mini */
+.week{display:grid;grid-template-columns:40px repeat(5,minmax(0,1fr));gap:5px;font-size:11px}
+.week .h{color:var(--muted);font-weight:800;letter-spacing:.1em;text-align:center;padding-bottom:4px}
+.week .t{color:var(--muted);font-weight:600;padding-top:2px}
+.blk{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:8px;padding:5px 6px;font-weight:700;font-size:11px;line-height:1.2;border-left:3px solid}
+.blk.trade{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.blk.life{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+.blk.off{background:var(--card-2);border-color:var(--line-2);color:var(--muted)}
+.blk.study{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+
+/* Journal */
+.jsum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.jsum div{border-radius:14px;background:var(--card);border:1px solid var(--line);padding:12px}
+.jsum b{display:block;font-size:22px;font-weight:900;letter-spacing:-.04em}
+.jsum span{display:block;overflow-wrap:anywhere;font-size:10px;color:var(--muted);font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.pattern{margin-top:12px;border-radius:16px;padding:16px;background:var(--blue-soft);border:1px solid color-mix(in srgb,var(--blue) 35%,transparent);font-size:14px}
+.pattern h4{color:var(--blue);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-bottom:6px}
+
+/* Sí / No */
+.vs{display:grid;gap:16px}
+@media(min-width:860px){.vs{grid-template-columns:1fr 1fr}}
+.card.yes{border-color:color-mix(in srgb,var(--green) 40%,var(--line))}
+
+/* Precio */
+.price-card{max-width:560px;margin-inline:auto;text-align:left;border:1px solid color-mix(in srgb,var(--green) 50%,var(--line));box-shadow:0 0 0 6px var(--green-soft),0 40px 120px -40px rgba(31,224,140,.35)}
+.price{display:flex;align-items:baseline;gap:8px;margin:18px 0 6px}
+.price strong{font-size:72px;font-weight:900;letter-spacing:-.06em;line-height:1}
+.price-card .btn{width:100%;margin-top:26px}
+
+/* FAQ */
+.faq{display:grid;gap:10px;max-width:860px}
+details{border:1px solid var(--line);border-radius:20px;background:var(--card);padding:0 22px;transition:border-color .2s}
+details[open]{border-color:var(--line-2)}
+summary{list-style:none;cursor:pointer;padding:20px 0;font-weight:800;font-size:17px;display:flex;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--green);font-size:24px;line-height:1;transition:transform .25s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{color:var(--muted);padding-bottom:20px}
+
+/* CTA final + footer */
+.final{text-align:center;padding:96px 0}
+.final h2{max-width:14ch;margin:18px auto 28px}
+footer{border-top:1px solid var(--line);padding:48px 0 40px;font-size:14px;color:var(--muted)}
+.foot-top{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between}
+.foot-links{display:flex;flex-wrap:wrap;gap:20px;font-weight:600}
+.foot-links a:hover{color:var(--green)}
+.legal{margin-top:24px;padding:18px 20px;border-radius:18px;border:1px solid var(--line);background:var(--card);font-size:13px;line-height:1.6}
+.legal strong{color:var(--text)}
+
+/* Revelado al hacer scroll */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.2,.8,.2,1),transform .8s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<div class="bg-grid" aria-hidden="true"></div>
+
+<!-- ============ CABECERA ============ -->
+<header class="header" id="top">
+  <div class="wrap">
+    <a href="#top" class="logo" aria-label="Trading Plan, inicio">
+      <span class="logo-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 18 18"><rect x="2" y="7" width="3.2" height="7" rx="1" fill="#03160c"/><rect x="7.4" y="3" width="3.2" height="9" rx="1" fill="#03160c"/><rect x="12.8" y="1" width="3.2" height="7" rx="1" fill="#03160c"/></svg>
+      </span>
+      Trading Plan
+    </a>
+    <nav class="nav" aria-label="Principal">
+      <a href="#como">Cómo funciona</a><a href="#diagnostico">Diagnóstico</a><a href="#herramientas">Herramientas</a><a href="#precio">Precio</a>
+    </nav>
+    <button class="icon-btn" id="theme" aria-label="Cambiar tema claro u oscuro">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <a href="#precio" class="btn btn-primary btn-sm">Empezar <span class="arr">→</span></a>
+    <button class="icon-btn burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><span><i></i><i></i><i></i></span></button>
+  </div>
+</header>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menú">
+  <nav>
+    <a href="#como">Cómo funciona <span class="hl">→</span></a>
+    <a href="#diagnostico">Diagnóstico <span class="hl">→</span></a>
+    <a href="#herramientas">Herramientas <span class="hl">→</span></a>
+    <a href="#precio">Precio <span class="hl">→</span></a>
+    <a href="#faq">Preguntas <span class="hl">→</span></a>
+  </nav>
+  <button class="btn btn-ghost btn-sm menu-theme" id="theme2" type="button">Cambiar tema claro / oscuro</button>
+  <a href="#precio" class="btn btn-primary btn-xl">Crear mi plan <span class="arr">→</span></a>
+</div>
+
+<main>
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="reveal">
+      <span class="pill"><span class="dot"></span>Plan · Disciplina · Estilo de vida</span>
+      <h1>Deja de improvisar. <span class="hl-grad">Opera con un plan</span> que es tuyo.</h1>
+      <p class="lead">Convierte tus reglas en un plan escrito, un calendario que respeta tu vida y un journal que te enseña tus patrones. Sin señales. Sin promesas. Proceso.</p>
+      <div class="ctas">
+        <a href="#diagnostico" class="btn btn-primary btn-xl">Crear mi plan gratis <span class="arr">→</span></a>
+        <a href="#como" class="btn btn-ghost btn-xl">Ver cómo funciona</a>
+      </div>
+      <div class="trust"><span>Diagnóstico en 3 minutos</span><span>Tus datos, solo tuyos</span><span>Cancela cuando quieras</span></div>
+    </div>
+
+    <div class="reveal" style="position:relative">
+      <div class="terminal">
+        <div class="term-top"><span class="dot g"></span><b>US100 · Sesión NY</b><span class="chip">Dentro de tu plan</span></div>
+        <svg class="chart" viewBox="0 0 520 300" role="img" aria-label="Ilustración de un gráfico con niveles de entrada, stop y objetivo">
+          <defs><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1fe08c" stop-opacity=".22"/><stop offset="1" stop-color="#1fe08c" stop-opacity="0"/></linearGradient></defs>
+          <g id="candles"></g>
+          <!-- Niveles del plan -->
+          <rect x="300" y="78" width="200" height="74" fill="#1fe08c" opacity=".07"/>
+          <rect x="300" y="152" width="200" height="40" fill="#ff5468" opacity=".07"/>
+          <line x1="300" x2="500" y1="78" y2="78" stroke="#1fe08c" stroke-dasharray="5 5"/>
+          <line x1="300" x2="500" y1="152" y2="152" stroke="#4d8dff" stroke-width="1.5"/>
+          <line x1="300" x2="500" y1="192" y2="192" stroke="#ff5468" stroke-dasharray="5 5"/>
+          <text x="496" y="72" text-anchor="end" class="lvl-label" fill="#1fe08c">OBJETIVO · 2R</text>
+          <text x="496" y="146" text-anchor="end" class="lvl-label" fill="#4d8dff">ENTRADA</text>
+          <text x="496" y="208" text-anchor="end" class="lvl-label" fill="#ff5468">STOP · −1R</text>
+        </svg>
+        <p class="caption">Vista ilustrativa de la app · no es una operación real ni una recomendación</p>
+      </div>
+      <div class="floats"><div class="float f1"><span class="muted">Checklist pre-operación</span><b><span class="hl">✓</span> 5 de 5 cumplidos</b></div>
+      <div class="float f2"><span class="muted">Protocolo activo</span><b>Pausa de 20 min tras pérdida</b></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CINTA ============ -->
+<div class="ticker" aria-label="Lo que trabaja tu plan">
+  <div class="ticker-track">
+    <div class="ticker-group"><span>Plan escrito</span><span class="dot"></span><span>Riesgo fijo</span><span class="dot"></span><span>Journal honesto</span><span class="dot"></span><span>Pausa tras pérdida</span><span class="dot"></span><span>Hora de desconexión</span><span class="dot"></span><span>Revisión semanal</span><span class="dot"></span><span>Sueño y rutina</span><span class="dot"></span><span>Sin señales</span><span class="dot"></span></div>
+    <div class="ticker-group" aria-hidden="true"><span>Plan escrito</span><span class="dot"></span><span>Riesgo fijo</span><span class="dot"></span><span>Journal honesto</span><span class="dot"></span><span>Pausa tras pérdida</span><span class="dot"></span><span>Hora de desconexión</span><span class="dot"></span><span>Revisión semanal</span><span class="dot"></span><span>Sueño y rutina</span><span class="dot"></span><span>Sin señales</span><span class="dot"></span></div>
+  </div>
+</div>
+
+<!-- ============ CIFRAS (reales del producto) ============ -->
+<div class="wrap">
+  <div class="stats reveal" aria-label="El producto en cifras">
+    <div class="stat"><strong>6</strong><span>preguntas para un diagnóstico que te explica el porqué</span></div>
+    <div class="stat"><strong>1</strong><span>plan escrito con tus reglas, versionado</span></div>
+    <div class="stat"><strong>0</strong><span>señales de compra o venta. Nunca.</span></div>
+    <div class="stat"><strong>3</strong><span>activos en la calculadora: US100, GER40 y el tuyo</span></div>
+  </div>
+</div>
+
+<!-- ============ CÓMO FUNCIONA ============ -->
+<section class="sec" id="como">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow"><span class="dot"></span>Cómo funciona</span>
+      <h2>Tres pasos. <span class="hl">Un sistema</span> que te sostiene los días difíciles.</h2>
+    </div>
+    <div class="steps">
+      <article class="card reveal"><div class="step-n">01</div><h3>Diagnóstico que explica, no que juzga</h3><p>Seis preguntas sobre tiempo, riesgo, emociones y energía. En cada respuesta te contamos por qué puede pasar y cómo lo trabajará tu plan.</p></article>
+      <article class="card reveal"><div class="step-n">02</div><h3>Tu plan, con tus reglas</h3><p>La IA ordena y redacta lo que tú defines. No inventa estrategias. Recibes un plan, un calendario y protocolos de conducta.</p></article>
+      <article class="card reveal"><div class="step-n">03</div><h3>Ejecuta, registra, revisa</h3><p>Calculadora, checklist y journal en el día a día. Cada semana, una revisión que te propone mejoras sin culparte.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DIAGNÓSTICO DEMO ============ -->
+<section class="sec" id="diagnostico">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow"><span class="dot"></span>Pruébalo ahora</span>
+      <h2>Una pregunta del diagnóstico. <span class="hl">Responde con honestidad.</span></h2>
+    </div>
+    <div class="quiz">
+      <div class="card reveal">
+        <div class="q-progress" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+        <span class="eyebrow">Pregunta 3 de 6 · Emociones</span>
+        <p class="q-title" id="qtitle">¿Qué sueles hacer justo después de una pérdida?</p>
+        <div class="opts" role="group" aria-labelledby="qtitle" id="opts"></div>
+      </div>
+      <div class="explain reveal" id="explain" aria-live="polite">
+        <div class="tip why"><h4>Por qué puede pasar</h4><p id="why">Elige una opción para ver la explicación.</p></div>
+        <div class="tip plan"><h4>Cómo lo trabaja tu plan</h4><p id="plan">Cada respuesta se convierte en algo concreto dentro de tu plan.</p></div>
+        <div class="proto"><span class="chip blue">Protocolo</span><div><b id="proto">—</b><span class="muted" style="font-size:13px">Se añade a tu plan. Puedes editarlo o crear los tuyos.</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HERRAMIENTAS ============ -->
+<section class="sec" id="herramientas">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow"><span class="dot"></span>Herramientas</span>
+      <h2>Todo lo que necesitas para <span class="hl">cumplir tu plan.</span> Nada que te distraiga.</h2>
+    </div>
+    <div class="bento">
+      <!-- Calculadora -->
+      <article class="card b-calc reveal">
+        <span class="chip">Calculadora de riesgo</span>
+        <h3 style="margin-top:16px">El tamaño exacto, antes de cada entrada.</h3>
+        <p>Introduce los datos de tu bróker una vez y se guardan por activo. Redondeo hacia abajo siempre.</p>
+        <div class="demo">
+          <form class="calc" id="calc" onsubmit="return false">
+            <label class="field full">Activo
+              <select id="c-asset"><option>US100</option><option>GER40</option><option>Personalizado</option></select></label>
+            <label class="field">Capital (€)<input id="c-bal" inputmode="decimal" value="10000"></label>
+            <label class="field">Riesgo %<input id="c-risk" inputmode="decimal" value="0.5"></label>
+            <label class="field">Stop (puntos)<input id="c-sl" inputmode="decimal" value="40"></label>
+            <label class="field">€ por punto (1 lote)<input id="c-vpp" inputmode="decimal" value="1"></label>
+            <label class="field">Lote mínimo<input id="c-min" inputmode="decimal" value="0.1"></label>
+            <label class="field">Paso de lote<input id="c-step" inputmode="decimal" value="0.1"></label>
+            <div class="result"><div><small>Tamaño</small><strong id="c-out">—</strong></div><div style="text-align:right"><small>Riesgo real</small><b id="c-real">—</b></div></div>
+            <div class="warns" id="c-warns"></div>
+          </form>
+          <p class="caption" style="text-align:left">Valores de ejemplo. Usa los de tu bróker: cambian entre cuentas.</p>
+        </div>
+      </article>
+
+      <!-- Journal -->
+      <article class="card b-journal reveal">
+        <span class="chip blue">Journal con patrones</span>
+        <h3 style="margin-top:16px">Tu journal te habla. Sin juicios.</h3>
+        <p>Emoción antes de entrar, cumplimiento del plan y error principal. Las operaciones no realizadas también cuentan.</p>
+        <div class="demo">
+          <div class="jsum">
+            <div><span>Cumplimiento</span><b class="hl">82%</b></div>
+            <div><span>R acumulado</span><b>+6,4R</b></div>
+            <div><span>No realizadas</span><b>5</b></div>
+          </div>
+          <div class="pattern"><h4>Un patrón, sin juicio</h4>“Con prisa” aparece en 3 de las operaciones donde no seguiste el plan. Puede indicar que entras con el tiempo justo. <b>Idea:</b> empieza la sesión 10 minutos antes y repasa el checklist.</div>
+          <p class="caption" style="text-align:left">Datos de muestra para ilustrar la pantalla.</p>
+        </div>
+      </article>
+
+      <!-- Calendario -->
+      <article class="card b-cal reveal">
+        <span class="chip amber">Calendario de vida</span>
+        <h3 style="margin-top:16px">Trading, sueño, comida y desconexión. En un mismo plan.</h3>
+        <p>Bloques que mueves arrastrando (o con flechas en el móvil). Te avisamos si encadenas demasiadas horas de pantalla.</p>
+        <div class="demo">
+          <div class="week" aria-hidden="true">
+            <span></span><span class="h">LUN</span><span class="h">MAR</span><span class="h">MIÉ</span><span class="h">JUE</span><span class="h">VIE</span>
+            <span class="t">07:00</span><div class="blk life">Ejercicio</div><div class="blk life">Paseo</div><div class="blk life">Ejercicio</div><div class="blk life">Paseo</div><div class="blk life">Ejercicio</div>
+            <span class="t">14:30</span><div class="blk study">Análisis</div><div class="blk study">Análisis</div><div class="blk study">Backtest</div><div class="blk study">Análisis</div><div class="blk study">Formación</div>
+            <span class="t">15:30</span><div class="blk trade">Sesión NY</div><div class="blk trade">Sesión NY</div><div class="blk trade">Sesión NY</div><div class="blk trade">Sesión NY</div><div class="blk trade">Sesión NY</div>
+            <span class="t">17:30</span><div class="blk off">Desconexión</div><div class="blk off">Desconexión</div><div class="blk off">Desconexión</div><div class="blk off">Desconexión</div><div class="blk off">Desconexión</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Plan -->
+      <article class="card b-plan reveal">
+        <span class="chip">Plan con IA</span>
+        <h3 style="margin-top:16px">Copiloto, no gurú.</h3>
+        <ul class="arrows">
+          <li>Redacta solo con tus reglas</li>
+          <li>Versiones para ver tu evolución</li>
+          <li>Revisión semanal que propone</li>
+          <li>Nunca dice compra o vende</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SÍ / NO ============ -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow"><span class="dot"></span>Transparencia</span>
+      <h2>Lo que somos. <span class="hl">Y lo que nunca seremos.</span></h2>
+    </div>
+    <div class="vs">
+      <div class="card yes reveal"><h3>Sí</h3><ul class="arrows"><li>Una herramienta para escribir y cumplir tu plan</li><li>Un registro honesto de lo que haces y cómo te sientes</li><li>Un calendario que incluye tu vida, no solo el gráfico</li><li>Propuestas de mejora basadas en tus propios datos</li></ul></div>
+      <div class="card reveal"><h3>No</h3><ul class="arrows crosses"><li>Señales de compra o venta</li><li>Estrategias “ganadoras” vendidas como atajo</li><li>Promesas de rentabilidad</li><li>Asesoramiento financiero ni médico</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRECIO ============ -->
+<section class="sec" id="precio">
+  <div class="wrap" style="text-align:center">
+    <div class="sec-head reveal" style="margin-inline:auto;justify-items:center">
+      <span class="eyebrow"><span class="dot"></span>Precio</span>
+      <h2>Un plan. <span class="hl">Todo incluido.</span></h2>
+    </div>
+    <div class="card price-card reveal">
+      <span class="chip">Core</span>
+      <div class="price"><strong>14,99 €</strong><span class="muted">/ mes</span></div>
+      <p class="muted" style="margin:0">Impuestos calculados en el pago según tu país. Cancela cuando quieras.</p>
+      <ul class="arrows">
+        <li>Diagnóstico y plan generado con tus reglas</li>
+        <li>Protocolos de conducta editables</li>
+        <li>Calendario de vida con bloques movibles</li>
+        <li>Calculadora de riesgo y checklist</li>
+        <li>Journal con patrones y revisión semanal</li>
+      </ul>
+      <a href="#top" class="btn btn-primary btn-xl">Empezar ahora <span class="arr">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="sec" id="faq">
+  <div class="wrap">
+    <div class="sec-head reveal"><span class="eyebrow"><span class="dot"></span>Preguntas</span><h2>Lo que nos <span class="hl">suelen preguntar.</span></h2></div>
+    <div class="faq">
+      <details class="reveal"><summary>¿Me vais a decir qué operar?</summary><p>No. Nunca damos señales ni recomendaciones de compra o venta. Te ayudamos a escribir, cumplir y revisar tu propio plan.</p></details>
+      <details class="reveal"><summary>¿La IA inventa mi estrategia?</summary><p>No. Solo ordena y redacta las reglas que tú das. Si falta algo, te lo pregunta en lugar de inventarlo.</p></details>
+      <details class="reveal"><summary>¿Quién ve mis datos?</summary><p>Solo tú. Cada registro está aislado por usuario a nivel de base de datos.</p></details>
+      <details class="reveal"><summary>¿Sirve si opero poco tiempo al día?</summary><p>Sí. El plan se adapta al tiempo que tienes y protege tu descanso, tus comidas y tu desconexión.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA FINAL ============ -->
+<section class="final">
+  <div class="wrap reveal">
+    <span class="eyebrow"><span class="dot g"></span>Tu siguiente sesión empieza aquí</span>
+    <h2>El mercado no cambia. <span class="hl-grad">Tu proceso, sí.</span></h2>
+    <a href="#diagnostico" class="btn btn-primary btn-xl">Hacer el diagnóstico <span class="arr">→</span></a>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top"><a href="#top" class="logo" style="margin:0">Trading Plan</a><nav class="foot-links" aria-label="Legal"><a href="#">Privacidad</a><a href="#">Términos</a><a href="#">Cookies</a><a href="#">Contacto</a></nav></div>
+    <div class="legal">
+      <strong>Aviso importante.</strong> Trading Plan es una herramienta de planificación y registro. No ofrece asesoramiento financiero, de inversión ni médico, y no recomienda comprar o vender ningún instrumento. Los CFD son instrumentos complejos y conllevan un riesgo elevado de perder dinero rápidamente debido al apalancamiento. Valora si comprendes cómo funcionan y si puedes permitirte asumir ese riesgo. Los resultados pasados no garantizan resultados futuros.
+    </div>
+  </div>
+</footer>
+
+<script>
+// Cabecera al hacer scroll
+const header=document.querySelector('.header');
+const onScroll=()=>header.classList.toggle('scrolled',scrollY>12);onScroll();addEventListener('scroll',onScroll,{passive:true});
+
+// Menú a pantalla completa
+const burger=document.getElementById('burger');
+const setMenu=open=>{document.body.classList.toggle('menu-open',open);burger.setAttribute('aria-expanded',open);burger.setAttribute('aria-label',open?'Cerrar menú':'Abrir menú');document.body.style.overflow=open?'hidden':''};
+burger.onclick=()=>setMenu(!document.body.classList.contains('menu-open'));
+document.querySelectorAll('#menu a').forEach(a=>a.onclick=()=>setMenu(false));
+addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false)});
+
+// Tema
+const root=document.documentElement;
+try{const t=localStorage.getItem('tp-theme');if(t)root.dataset.theme=t}catch(e){}
+const toggleTheme=()=>{const t=root.dataset.theme==='light'?'dark':'light';root.dataset.theme=t;try{localStorage.setItem('tp-theme',t)}catch(e){}};
+document.getElementById('theme').onclick=toggleTheme;document.getElementById('theme2').onclick=toggleTheme;
+
+// Velas ilustrativas: impulso, retroceso a la zona de entrada y continuación
+(()=>{const g=document.getElementById('candles');
+ const closes=[248,240,244,232,226,229,214,206,210,196,186,190,176,168,172,160,150,156,164,160,170,158,152,150,154,142,132,136,124,116,112];
+ let s=11;const r=()=>(s=(s*9301+49297)%233280)/233280;let html='',x=14,o=254;
+ closes.forEach(c=>{const up=c<o;const col=up?'#1fe08c':'#ff5468';const hi=Math.min(o,c)-2-r()*9,lo=Math.max(o,c)+2+r()*9;
+  html+=`<line x1="${x+5}" x2="${x+5}" y1="${hi.toFixed(1)}" y2="${lo.toFixed(1)}" stroke="${col}" stroke-width="1.3"/><rect x="${x}" y="${Math.min(o,c)}" width="10" height="${Math.max(2,Math.abs(c-o))}" rx="2" fill="${col}"/>`;o=c;x+=15.6});
+ g.innerHTML=html})();
+
+// Diagnóstico (en la app sale de quiz_options)
+const opts=[
+ {l:'Busco recuperarla rápido',w:'Perder activa las ganas de “arreglarlo” cuanto antes. Es una reacción muy común, no un defecto.',p:'Tu plan incluye una pausa de 20 minutos tras cada pérdida y repasar el checklist antes de volver.',pr:'Pausa de 20 minutos tras una pérdida'},
+ {l:'Subo el tamaño en la siguiente',w:'Después de perder, la siguiente operación puede sentirse como la que lo compensa todo.',p:'Tu plan fija un riesgo que no cambia tras una pérdida y un límite de pérdida diaria para cerrar la sesión.',pr:'Límite de pérdida diaria'},
+ {l:'Paro y lo reviso',w:'Saber parar es una de las habilidades más valiosas. Merece estar por escrito para los días difíciles.',p:'Tu plan convierte esa pausa en un protocolo fijo, para que no dependa de cómo te sientas ese día.',pr:'Pausa de 20 minutos tras una pérdida'},
+ {l:'Sigo como si nada',w:'Seguir con calma está bien, siempre que la siguiente entrada venga del plan y no de la inercia.',p:'Tu plan añade un límite de pérdida diaria para que el día tenga un final claro.',pr:'Límite de pérdida diaria'}];
+const box=document.getElementById('opts'),ex=document.getElementById('explain');
+opts.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.type='button';b.setAttribute('aria-pressed','false');b.innerHTML=`<span class="radio"></span>${o.l}`;
+ b.onclick=()=>{box.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');
+ document.getElementById('why').textContent=o.w;document.getElementById('plan').textContent=o.p;document.getElementById('proto').textContent=o.pr;ex.classList.add('on')};box.appendChild(b)});
+
+// Calculadora: floor al paso, avisos de lote mínimo y límite del plan
+const PLAN_MAX_RISK=1; // en la app: plan_versions.max_risk_pct
+const $=id=>document.getElementById(id);const num=v=>parseFloat(String(v).replace(',','.'));
+const fmt=(n,d=2)=>n.toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+function calc(){
+ const bal=num($('c-bal').value),risk=num($('c-risk').value),sl=num($('c-sl').value),vpp=num($('c-vpp').value),min=num($('c-min').value),step=num($('c-step').value);
+ const w=[];if([bal,risk,sl,vpp,min,step].some(v=>!(v>0))){$('c-out').textContent='—';$('c-real').textContent='—';$('c-warns').innerHTML='<div class="warn">Completa todos los campos con valores positivos.</div>';return}
+ const raw=(bal*risk/100)/(sl*vpp);const dec=(String(step).split('.')[1]||'').length;
+ const lots=Math.floor(raw/step+1e-9)*step;const real=lots*sl*vpp;
+ if(risk>PLAN_MAX_RISK)w.push(['red',`El riesgo (${fmt(risk,1)} %) supera el límite de tu plan (${fmt(PLAN_MAX_RISK,1)} %).`]);
+ if(lots<min)w.push(['',`El tamaño calculado no alcanza el lote mínimo (${min}). Con este stop no es posible respetar tu riesgo.`]);
+ $('c-out').textContent=lots<min?'0 lotes':fmt(lots,dec)+' lotes';$('c-real').textContent=lots<min?'—':fmt(real)+' € · '+fmt(real/bal*100)+' %';
+ $('c-warns').innerHTML=w.map(([c,t])=>`<div class="warn ${c}">${t}</div>`).join('');}
+document.querySelectorAll('#calc input,#calc select').forEach(i=>i.addEventListener('input',calc));calc();
+
+// Revelado
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
