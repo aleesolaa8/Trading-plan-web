@@ -1,0 +1,93 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: min(1180px, 100%);
+  margin-inline: auto;
+}
+.back {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.back:hover {
+  color: var(--green);
+}
+.main {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  padding: 48px 0;
+}
+.card {
+  display: grid;
+  gap: 22px;
+  width: min(480px, 100%);
+  padding: 32px 24px;
+  border-radius: var(--r-card);
+  border: 1px solid var(--line-2);
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  box-shadow: var(--shadow);
+}
+.head {
+  display: grid;
+  gap: 12px;
+}
+.head h1 {
+  font-size: clamp(34px, 7vw, 44px);
+}
+.form {
+  display: grid;
+  gap: 18px;
+}
+.alt {
+  font-size: 15px;
+  color: var(--muted);
+  text-align: center;
+}
+.alt a,
+.inline {
+  color: var(--green);
+  font-weight: 700;
+}
+.row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -8px;
+  font-size: 14px;
+}
+.risk {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--amber) 35%, transparent);
+  background: var(--amber-soft);
+  font-size: 14px;
+  color: var(--text);
+}
+.risk strong {
+  color: var(--amber);
+}
+.legal {
+  width: min(560px, 100%);
+  margin-inline: auto;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+.legal a {
+  text-decoration: underline;
+}
+@media (min-width: 560px) {
+  .card {
+    padding: 40px;
+  }
+}

@@ -1,6 +1,6 @@
-# Trading Plan · Plan de arquitectura (paso 1)
+# Time to Trade · Plan de arquitectura
 
-> Estado: **pendiente de tu OK**. No se escribe código de aplicación hasta que lo apruebes.
+> Estado: **aprobado** (paso 1). Paso 2 terminado: auth, layout y sistema de diseño.
 > Prioridad: este documento sigue el *Prompt v2*; el brief maestro, el prototipo HTML y las capturas de Gotoyou **no llegaron adjuntos** y hay que revisarlos contra este plan cuando estén.
 
 ---
@@ -19,7 +19,7 @@
 
 | Capa | Elección | Motivo |
 |---|---|---|
-| Framework | **Next.js 15 (App Router) + React + TypeScript** estricto | Server Components, Route Handlers para IA y Stripe |
+| Framework | **Next.js 16 (App Router) + React + TypeScript** estricto | Server Components, Route Handlers para IA y Stripe |
 | Estilos | **CSS Modules + tokens CSS** (`src/styles/tokens.css`) | Control total del diseño, cero dependencias de UI genéricas |
 | Datos | **Supabase**: Postgres, Auth (email + magic link), Storage | RLS nativo |
 | Cliente BD | `@supabase/ssr` (cookies) en servidor y navegador | Sesión segura en SSR |
@@ -71,7 +71,7 @@ src/
       calendar.ts           solapes y horas seguidas de pantalla (puro, testeado)
       access.ts             control de acceso por suscripción
   styles/tokens.css
-middleware.ts               refresco de sesión + redirecciones de acceso
+src/proxy.ts                refresco de sesión + redirecciones (en Next 16 "middleware" pasa a llamarse "proxy")
 supabase/
   migrations/0001_init.sql  esquema + RLS (incluido en este paso)
   seed.sql                  planes, diagnóstico y protocolos (incluido)
@@ -133,7 +133,7 @@ avisos:    lotes < lote_mínimo     → "no alcanza el lote mínimo"
            riesgo_% > max_risk_pct → "supera el límite de tu plan"
 ```
 - Los presets US100 / GER40 **solo rellenan el nombre**; los valores de contrato los mete el usuario y se guardan en `assets`.
-- Interpreto "límite del plan" como el `max_risk_pct` que el usuario fija en su plan de trading. Si te referías a un límite por nivel de suscripción, se añade a `plans.features`.
+- **Confirmado:** el "límite del plan" es el `max_risk_pct` que cada usuario fija en su propio plan. La calculadora usa solo los datos que él introduce.
 - La vista previa (`design/preview.html`) ya incluye esta lógica funcionando.
 
 ### 5.5 Journal y patrones
@@ -146,9 +146,9 @@ avisos:    lotes < lote_mínimo     → "no alcanza el lote mínimo"
 
 ### 5.7 Stripe y acceso
 - Checkout con `STRIPE_PRICE_CORE` (o `plans.stripe_price_id`), `automatic_tax` activado y prueba de `trial_days` desde `plans`.
+- **Precio decidido: 14,99 € + IVA al mes.** En Stripe el precio se crea con `tax_behavior = exclusive`; Stripe Tax suma el IVA del país del cliente en el pago.
 - Webhooks: `checkout.session.completed`, `customer.subscription.created|updated|deleted`, `invoice.payment_failed` → actualizan `subscriptions`. Firma verificada e idempotencia con `stripe_events`.
 - `middleware.ts` + `has_active_access()` protegen la zona `(app)`; sin suscripción → página de precios.
-- **IVA:** decidir en Stripe si 14,99 € es precio con impuestos incluidos (`tax_behavior = inclusive`, recomendado para B2C en la UE) o sin ellos. La landing muestra "impuestos calculados en el pago" hasta que lo confirmes.
 
 ---
 
@@ -197,19 +197,44 @@ NEXT_PUBLIC_SITE_URL=
 
 ---
 
-## 8. Decisiones que necesito de ti
+## 8. Decisiones tomadas
 
-1. **OK al esquema y a la arquitectura** para empezar el paso 2.
-2. **Paleta**: ¿"Terminal" con azul (propuesta) o mantener el morado del brief?
-3. **Nombre de marca y dominio**: he usado "Trading Plan" como provisional.
-4. **Proveedor de IA**: propongo Claude (Anthropic). Si prefieres otro, solo cambia `lib/ai/client.ts`.
-5. **IVA**: ¿14,99 € con impuestos incluidos?
-6. **Duración del trial**: el seed pone 7 días en Core (editable en `plans`).
-7. **Adjuntos**: reenvíame el brief maestro, el prototipo HTML y las capturas para contrastar pantallas y textos.
+| Tema | Decisión |
+|---|---|
+| Arquitectura y esquema | Aprobados |
+| Paleta | "Terminal" (verde / azul / rojo solo para riesgo) |
+| Marca | **Time to Trade** |
+| Precio | **14,99 € + IVA** al mes (Stripe `tax_behavior = exclusive`) |
+| Límite de riesgo | Lo fija cada usuario en su plan |
+| IA | **Claude (Anthropic)**, siempre desde el servidor |
+| Trial | 7 días en Core (editable en `plans`) |
 
----
+Pendiente: reenviar el brief maestro, el prototipo HTML y las capturas de Gotoyou.
 
-## 9. Cómo probar este paso
+## 8 bis. Copiloto 24 h (chat con IA), propuesta
+
+Un chat disponible a cualquier hora para acompañar el **proceso**, sobre todo en momentos de agobio. Se construye en el paso 4 junto al generador del plan y comparte sus guardarraíles.
+
+**Qué hace**
+- Conoce el plan, los protocolos, el checklist y el journal del usuario (solo los suyos).
+- Ante "no sé si entrar": no decide por él. Le devuelve a su plan: "¿Cumple tu checklist? ¿Estás dentro de tu ventana? ¿Cómo estás de energía?". Si duda, le recuerda que no operar también es cumplir.
+- Ante agobio o frustración: propone su protocolo (pausa de 20 min, respiración, cerrar la plataforma), escucha y valida sin juzgar.
+- Tras la conversación puede sugerir una nota para el journal.
+
+**Qué no hace nunca**
+- Decir compra, vende, entra o sal, ni opinar sobre el mercado.
+- Prometer rentabilidad.
+- Hacer terapia ni diagnosticar. Es apoyo y hábitos, no un psicólogo.
+- Ante señales de crisis (autolesión, desesperación grave), deja el tema del trading y muestra recursos de ayuda: **024** (línea de atención a la conducta suicida, España, 24 h, gratuita) y **112** para emergencias.
+
+**Técnica**
+- Tablas `chat_threads` y `chat_messages` con RLS (solo el dueño).
+- Respuestas en streaming desde `app/api/ai/chat/route.ts`. La clave de la IA nunca llega al navegador.
+- Filtro de salida que bloquea órdenes de compra/venta y lenguaje clínico, y detector de crisis antes de llamar al modelo.
+- Límite de mensajes al mes por plan (`plans.features.chat_messages_per_month`) para controlar costes.
+- Aviso visible en el chat: "Copiloto de proceso. No es asesoramiento financiero ni psicológico."
+
+## 9. Cómo probar el paso 1
 
 **Vista previa de diseño**: abre `design/preview.html` en el navegador (móvil y escritorio). Prueba el menú, el tema claro/oscuro, una respuesta del diagnóstico y la calculadora (cambia el riesgo por encima del 1 % o sube el stop para ver los avisos).
 
@@ -229,9 +254,9 @@ Para comprobar RLS: crea dos usuarios, inserta una entrada de journal con el pri
 
 ## 10. Qué falta (siguientes pasos)
 
-2. Auth, layout y sistema de diseño en Next.js (tokens, cinta, cabecera, menú).
+2. ~~Auth, layout y sistema de diseño~~ **hecho**.
 3. Landing, diagnóstico explicativo y onboarding.
-4. Generador de plan con IA, protocolos y versiones.
+4. Generador de plan con IA, protocolos, versiones y **copiloto 24 h**.
 5. Calendario con bloques movibles.
 6. Calculadora, checklist y journal con patrones.
 7. Dashboard y revisión semanal con IA.

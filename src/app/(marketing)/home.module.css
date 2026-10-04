@@ -1,0 +1,30 @@
+.hero {
+  display: grid;
+  gap: 22px;
+  justify-items: start;
+  padding: calc(var(--header-h) + 60px) 0 64px;
+}
+.hero h1 {
+  max-width: 14ch;
+}
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+  margin-top: 10px;
+}
+.ctas > * {
+  flex: 1 1 220px;
+}
+.stats {
+  padding: 88px 0 48px;
+}
+@media (min-width: 960px) {
+  .hero {
+    padding-top: calc(var(--header-h) + 96px);
+  }
+  .ctas > * {
+    flex: 0 0 auto;
+  }
+}

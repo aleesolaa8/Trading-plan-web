@@ -1,0 +1,16 @@
+.page {
+  display: grid;
+  gap: 22px;
+  padding: calc(var(--header-h) + 64px) 0 40px;
+}
+.page h1 {
+  font-size: clamp(40px, 6vw, 64px);
+}
+.body {
+  max-width: 68ch;
+  color: var(--muted);
+  font-size: 17px;
+}
+.body strong {
+  color: var(--text);
+}

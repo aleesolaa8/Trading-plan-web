@@ -1,0 +1,23 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  font-size: 20px;
+  white-space: nowrap;
+}
+.mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 10px;
+  background: var(--grad);
+  color: var(--green-ink);
+  box-shadow: 0 6px 24px -6px rgba(31, 224, 140, 0.7);
+}
+@media (max-width: 420px) {
+  .logo {
+    font-size: 18px;
+  }
+}
