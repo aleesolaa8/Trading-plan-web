@@ -269,6 +269,12 @@ ul.crosses li::before{content:"×";color:var(--red);font-size:20px;line-height:1
 .plan-top{display:flex;flex-wrap:wrap;gap:8px}
 .plan-pro{border:1px solid color-mix(in srgb,var(--green) 50%,var(--line));box-shadow:0 0 0 6px var(--green-soft),0 40px 120px -40px rgba(31,224,140,.35)}
 .plans-note{text-align:center;margin-top:20px;font-size:14px}
+.billing{display:inline-flex;gap:4px;padding:5px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);margin-top:6px}
+.billing button{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;font-weight:700;font-size:15px;color:var(--muted);transition:background .2s,color .2s}
+.billing button[aria-pressed="true"]{background:var(--grad);color:var(--green-ink)}
+.billing .save{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--green-soft);color:var(--green)}
+.billing button[aria-pressed="true"] .save{background:rgba(3,22,12,.15);color:var(--green-ink)}
+.price-sub{margin:0!important;font-size:14px;font-weight:600;color:var(--green)!important}
 @media(min-width:860px){.plans{grid-template-columns:repeat(2,minmax(0,1fr))}.plan-for{min-height:3.2em}}
 .price{display:flex;align-items:baseline;gap:8px;margin:18px 0 6px}
 .price strong{font-size:72px;font-weight:900;letter-spacing:-.06em;line-height:1}
@@ -532,13 +538,18 @@ footer{border-top:1px solid var(--line);padding:48px 0 40px;font-size:14px;color
     <div class="sec-head reveal" style="margin-inline:auto;justify-items:center;text-align:center">
       <span class="eyebrow"><span class="dot"></span>Precio</span>
       <h2>Dos planes. <span class="hl">Los dos completos.</span></h2>
-      <p class="lead" style="margin-inline:auto">Con Core tienes todo lo necesario para operar con un plan. Pro suma la IA sin límites y las herramientas de quien va en serio. 7 días de prueba gratis.</p>
+      <p class="lead" style="margin-inline:auto">Core tiene todo lo necesario para operar con un plan. Pro suma la IA sin límites y las herramientas de quien opera muchas horas o varias cuentas.</p>
+      <div class="billing" role="group" aria-label="Forma de pago">
+        <button type="button" data-bill="month" aria-pressed="true">Mensual</button>
+        <button type="button" data-bill="year" aria-pressed="false">Anual <span class="save">2 meses gratis</span></button>
+      </div>
     </div>
     <div class="plans">
       <article class="card plan reveal">
         <span class="chip">Core</span>
         <p class="plan-for">Para operar con un plan y cumplirlo</p>
-        <div class="price"><strong>14,99 €</strong><span class="muted">+ IVA / mes</span></div>
+        <div class="price"><strong data-m="14,99 €" data-y="149,90 €">14,99 €</strong><span class="muted" data-m="+ IVA / mes" data-y="+ IVA / año">+ IVA / mes</span></div>
+        <p class="price-sub" data-m="Sin permanencia" data-y="Equivale a 12,49 € al mes">Sin permanencia</p>
         <ul class="arrows">
           <li>Diagnóstico de 7 preguntas y plan con tus reglas</li>
           <li>Protocolos de conducta editables</li>
@@ -547,29 +558,31 @@ footer{border-top:1px solid var(--line);padding:48px 0 40px;font-size:14px;color
           <li>Checklist antes de cada entrada</li>
           <li>Journal ilimitado con patrones sin juicio</li>
           <li>Resumen semanal de tus números</li>
-          <li>Copiloto: 30 mensajes al mes</li>
+          <li>Recordatorios de sesión y de límite diario</li>
+          <li>Copiloto con IA: 40 mensajes al mes</li>
+          <li>Exporta tus datos cuando quieras (CSV)</li>
         </ul>
         <a href="#top" class="btn btn-ghost btn-xl">Empezar con Core <span class="arr">→</span></a>
       </article>
       <article class="card plan plan-pro reveal">
         <div class="plan-top"><span class="chip">Pro</span><span class="chip blue">El más completo</span></div>
-        <p class="plan-for">Para quien opera muchas horas o con cuenta de fondeo</p>
-        <div class="price"><strong>24,99 €</strong><span class="muted">+ IVA / mes</span></div>
+        <p class="plan-for">Para quien opera muchas horas, con fondeo o con varias cuentas</p>
+        <div class="price"><strong data-m="24,99 €" data-y="249,90 €">24,99 €</strong><span class="muted" data-m="+ IVA / mes" data-y="+ IVA / año">+ IVA / mes</span></div>
+        <p class="price-sub" data-m="Sin permanencia" data-y="Equivale a 20,83 € al mes">Sin permanencia</p>
         <p class="plan-plus">Todo lo de Core, y además:</p>
         <ul class="arrows">
           <li><b>Copiloto 24 h sin límite</b>: habla con él cuando lo necesites</li>
           <li>Revisión semanal escrita por IA con propuestas para tu plan</li>
-          <li>La IA revisa tus capturas contra tu setup escrito</li>
+          <li>La IA revisa tus capturas y las compara con tu setup escrito</li>
           <li>Estadísticas avanzadas: por mercado, hora, día y emoción</li>
-          <li>Modo cuenta de fondeo: límites de la prueba y avisos</li>
-          <li>Hasta 3 cuentas o planes distintos</li>
-          <li>Recordatorios de sesión y de límite diario</li>
-          <li>Exporta tu plan y tu journal (PDF y CSV)</li>
+          <li><b>Hasta 3 cuentas</b> (personal, fondeo, demo) con resumen conjunto</li>
+          <li>Modo fondeo: límite diario y caída máxima con avisos</li>
+          <li>Informe mensual en PDF de tu progreso</li>
         </ul>
         <a href="#top" class="btn btn-primary btn-xl">Probar Pro 7 días gratis <span class="arr">→</span></a>
       </article>
     </div>
-    <p class="muted plans-note">El IVA se calcula en el pago según tu país. Cambia de plan o cancela cuando quieras, sin permanencia.</p>
+    <p class="muted plans-note">Prueba de 7 días con todo Pro incluido. Al terminar eliges plan; si no eliges, no se cobra nada. El IVA se calcula en el pago según tu país.</p>
   </div>
 </section>
 
@@ -581,6 +594,8 @@ footer{border-top:1px solid var(--line);padding:48px 0 40px;font-size:14px;color
       <details class="reveal"><summary>¿Me vais a decir qué operar?</summary><p>No. Nunca damos señales ni recomendaciones de compra o venta. Te ayudamos a escribir, cumplir y revisar tu propio plan.</p></details>
       <details class="reveal"><summary>¿La IA inventa mi estrategia?</summary><p>No. Solo ordena y redacta las reglas que tú das. Si falta algo, te lo pregunta en lugar de inventarlo.</p></details>
       <details class="reveal"><summary>¿Quién ve mis datos?</summary><p>Solo tú. Cada registro está aislado por usuario a nivel de base de datos.</p></details>
+      <details class="reveal"><summary>¿Qué diferencia hay entre Core y Pro?</summary><p>Con Core tienes todo para operar con un plan: diagnóstico, plan, calendario, calculadora, checklist, journal con patrones y recordatorios. Pro suma el copiloto con IA sin límite, las revisiones escritas por IA, estadísticas avanzadas y hasta 3 cuentas, por ejemplo tu cuenta personal y una de fondeo.</p></details>
+      <details class="reveal"><summary>¿Puedo cambiar de plan o cancelar?</summary><p>Sí, cuando quieras y desde tu cuenta. No hay permanencia. Si pasas a Pro, el cambio es inmediato y solo pagas la diferencia proporcional.</p></details>
       <details class="reveal"><summary>¿Sirve si opero poco tiempo al día?</summary><p>Sí. El plan se adapta al tiempo que tienes y protege tu descanso, tus comidas y tu desconexión.</p></details>
     </div>
   </div>
@@ -641,6 +656,13 @@ const box=document.getElementById('opts'),ex=document.getElementById('explain');
 opts.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.type='button';b.setAttribute('aria-pressed','false');b.innerHTML=`<span class="radio"></span>${o.l}`;
  b.onclick=()=>{box.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');
  document.getElementById('why').textContent=o.w;document.getElementById('plan').textContent=o.p;document.getElementById('proto').textContent=o.pr;ex.classList.add('on')};box.appendChild(b)});
+
+// Precio mensual / anual
+document.querySelectorAll('[data-bill]').forEach(b=>b.addEventListener('click',()=>{
+  const y=b.dataset.bill==='year';
+  document.querySelectorAll('[data-bill]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  document.querySelectorAll('#precio [data-m]').forEach(el=>el.textContent=y?el.dataset.y:el.dataset.m);
+}));
 
 // Calculadora: floor al paso, avisos de lote mínimo y límite del plan
 const PLAN_MAX_RISK=1; // en la app: plan_versions.max_risk_pct

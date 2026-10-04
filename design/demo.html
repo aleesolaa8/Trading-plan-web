@@ -254,6 +254,21 @@ textarea.input{min-height:92px;padding:12px 14px;resize:vertical;line-height:1.5
 .tag.ok{color:var(--green);border-color:color-mix(in srgb,var(--green) 35%,transparent)}
 .tag.bad{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 35%,transparent)}
 
+/* Cuentas y modo fondeo */
+.accs{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.accs::-webkit-scrollbar{display:none}
+.accs button{flex:none}
+.acc-kind{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.75;margin-left:6px}
+.funded{border-radius:22px;border:1px solid color-mix(in srgb,var(--violet) 40%,var(--line));background:linear-gradient(180deg,var(--violet-soft),transparent);padding:18px;display:grid;gap:14px}
+.funded h3{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.meter{display:grid;gap:6px}
+.meter-top{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-weight:700}
+.meter-top span:last-child{color:var(--muted);font-weight:600}
+.bar{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;background:var(--green);transition:width .4s}
+.bar i.warn{background:var(--amber)}.bar i.danger{background:var(--red)}
+.chip.violet{background:var(--violet-soft);color:var(--violet)}
+
 /* Copiloto flotante */
 .fab{position:fixed;right:16px;bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;align-items:center;gap:10px;height:56px;padding:0 20px 0 16px;border-radius:999px;background:var(--grad);color:var(--green-ink);font-weight:800;box-shadow:var(--glow),0 14px 40px -12px rgba(0,0,0,.6);transition:transform .2s}
 .fab:hover{transform:translateY(-2px) scale(1.02)}
@@ -405,9 +420,10 @@ const ADVICE={
 const KEY='ttt-demo-v2';
 function todayIdx(){return ((new Date().getDay()+6)%7)+1}
 function isoToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-const fresh=()=>({view:'plan',stage:'quiz',qi:0,answers:{},rules:{name:'',markets:[],s1Start:'15:30',s1End:'17:30',s2Start:'',s2End:'',risk:'0.5',maxTrades:'2',maxLoss:'2',setup:'',management:''},planDate:null,protoOff:{},ownProtos:[],blocks:[],calDay:todayIdx(),assets:{},calc:{balance:'',market:'',sl:''},journal:[],chat:[]});
+const fresh=()=>({view:'plan',stage:'quiz',qi:0,answers:{},rules:{name:'',markets:[],s1Start:'15:30',s1End:'17:30',s2Start:'',s2End:'',risk:'0.5',maxTrades:'2',maxLoss:'2',setup:'',management:''},planDate:null,protoOff:{},ownProtos:[],blocks:[],calDay:todayIdx(),assets:{},calc:{balance:'',market:'',sl:''},journal:[],chat:[],accounts:[{id:'acc1',name:'Cuenta personal',kind:'personal',balance:'',daily:'',maxdd:'',target:''}],jAcc:'all'});
 let S=fresh();
 try{const raw=localStorage.getItem(KEY);if(raw)S={...fresh(),...JSON.parse(raw)}}catch(e){}
+if(!Array.isArray(S.accounts)||!S.accounts.length)S.accounts=fresh().accounts;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -815,13 +831,17 @@ function renderCalc(){
 /* ============================================================
    JOURNAL con resumen y patrones
    ============================================================ */
+const ACC_KIND={personal:'Personal',fondeo:'Fondeo',demo:'Demo'};
+const MAX_ACCOUNTS=3;
+const accName=id=>(S.accounts.find(a=>a.id===id)||S.accounts[0]).name;
+function jEntries(){return S.jAcc==='all'?S.journal:S.journal.filter(j=>(j.account||S.accounts[0].id)===S.jAcc)}
 function journalStats(){
-  const t=S.journal.filter(j=>j.type==='trade'),sk=S.journal.filter(j=>j.type==='skipped');
+  const all=jEntries(),t=all.filter(j=>j.type==='trade'),sk=all.filter(j=>j.type==='skipped');
   const R=t.reduce((s,j)=>s+num(j.r||0),0),wins=t.filter(j=>num(j.r)>0).length,ok=t.filter(j=>j.compliance==='si').length;
   return {n:t.length,skipped:sk.length,R,win:t.length?wins/t.length*100:0,avg:t.length?R/t.length:0,comp:t.length?ok/t.length*100:0};
 }
 function patterns(){
-  const bad=S.journal.filter(j=>j.type==='trade'&&j.compliance!=='si'),cnt={};
+  const bad=jEntries().filter(j=>j.type==='trade'&&j.compliance!=='si'),cnt={};
   bad.forEach(j=>{if(j.emotion)cnt['e:'+j.emotion]=(cnt['e:'+j.emotion]||0)+1;if(j.error&&j.error!=='ninguno')cnt['x:'+j.error]=(cnt['x:'+j.error]||0)+1});
   return Object.entries(cnt).filter(([,n])=>n>=2).sort((a,b)=>b[1]-a[1]).map(([k,n])=>{const[t,v]=k.split(':');return{kind:t,key:v,n,label:t==='e'?EMOTIONS[v]:ERRORS[v],total:bad.length}});
 }
@@ -831,6 +851,12 @@ function renderJour(){
   <div class="head"><span class="eyebrow"><span class="dot"></span>Journal</span>
   <h1>Lo que haces, <span class="hl-grad">sin juicios</span>.</h1>
   <p class="lead">Cada operación y cada operación que decidiste no hacer. Con el tiempo, tus datos te enseñan tus patrones.</p></div>
+  <div class="accs seg" role="group" aria-label="Cuenta">
+    ${S.accounts.length>1?`<button data-acc="all" aria-pressed="${S.jAcc==='all'}">Todas las cuentas</button>`:''}
+    ${S.accounts.map(a=>`<button data-acc="${a.id}" aria-pressed="${S.jAcc===a.id||(S.accounts.length===1)}">${esc(a.name)}<span class="acc-kind">${ACC_KIND[a.kind]}</span></button>`).join('')}
+    <button id="acc-manage">${S.accounts.length<MAX_ACCOUNTS?'+ Cuenta':'Gestionar'}</button>
+  </div>
+  ${fundedHTML()}
   <div class="row"><button class="btn btn-primary" id="j-new">+ Nueva entrada</button>${S.journal.length?'':'<button class="btn btn-ghost" id="j-demo">Ver con entradas de ejemplo</button>'}</div>
   <div class="stats">
     <div class="stat"><span>Operaciones</span><b>${st.n}</b></div>
@@ -841,19 +867,68 @@ function renderJour(){
     <div class="stat"><span>No realizadas</span><b>${st.skipped}</b></div>
   </div>
   ${pt.map(p=>`<div class="pattern"><h4>Un patrón, sin juicio</h4><p>${p.kind==='e'?`Entraste sintiéndote «${esc(p.label)}»`:`El error «${esc(p.label)}» aparece`} en ${p.n} de las ${p.total} operaciones donde no seguiste el plan del todo.</p><p class="muted">${esc(ADVICE[p.key]||'')}</p></div>`).join('')}
-  ${S.journal.length?`<div class="entries">${[...S.journal].sort((a,b)=>b.date.localeCompare(a.date)||b.ts-a.ts).map(entryHTML).join('')}</div>`:'<div class="card empty"><h2>Tu journal está vacío</h2><p class="muted">Apunta tu primera operación, o una que decidiste no hacer: también cuenta.</p></div>'}
+  ${jEntries().length?`<div class="entries">${[...jEntries()].sort((a,b)=>b.date.localeCompare(a.date)||b.ts-a.ts).map(entryHTML).join('')}</div>`:'<div class="card empty"><h2>Tu journal está vacío</h2><p class="muted">Apunta tu primera operación, o una que decidiste no hacer: también cuenta.</p></div>'}
   ${S.journal.some(j=>j.sample)?'<button class="btn btn-ghost btn-sm" id="j-clear" style="justify-self:start">Borrar entradas de ejemplo</button>':''}`;
   $('#j-new').onclick=openEntry;
+  v.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{S.jAcc=b.dataset.acc;save();renderJour()});
+  $('#acc-manage').onclick=openAccounts;
   $('#j-demo')?.addEventListener('click',loadSampleJournal);
   $('#j-clear')?.addEventListener('click',()=>{S.journal=S.journal.filter(j=>!j.sample);save();renderJour()});
   v.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(b.dataset.sure){S.journal=S.journal.filter(j=>j.id!==b.dataset.del);save();renderJour()}else{b.dataset.sure='1';b.textContent='¿Borrar?'}});
+}
+function fundedHTML(){
+  const a=S.accounts.find(x=>x.id===(S.accounts.length===1?S.accounts[0].id:S.jAcc));
+  if(!a||a.kind!=='fondeo')return '';
+  const risk=num(S.rules.risk)||1,es=S.journal.filter(j=>j.type==='trade'&&(j.account||S.accounts[0].id)===a.id).sort((x,y)=>x.date.localeCompare(y.date)||x.ts-y.ts);
+  const todayR=es.filter(j=>j.date===isoToday()).reduce((s,j)=>s+num(j.r||0),0);
+  let cum=0,low=0;es.forEach(j=>{cum+=num(j.r||0);low=Math.min(low,cum)});
+  const dayLoss=Math.max(0,-todayR*risk),dd=Math.max(0,-low*risk),gain=cum*risk;
+  const meter=(label,val,lim,txt)=>{const pct=lim>0?Math.min(100,val/lim*100):0;return `<div class="meter"><div class="meter-top"><span>${label}</span><span>${txt}</span></div><div class="bar"><i class="${pct>=85?'danger':pct>=60?'warn':''}" style="width:${pct}%"></i></div></div>`};
+  const d=num(a.daily),m=num(a.maxdd),t=num(a.target);
+  return `<div class="funded"><h3>Modo fondeo · ${esc(a.name)} <span class="chip violet">Pro</span></h3>
+    ${d>0?meter('Pérdida de hoy',dayLoss,d,`${fmt(dayLoss,2)} % de ${fmt(d,1)} % permitido`):''}
+    ${m>0?meter('Caída máxima',dd,m,`${fmt(dd,2)} % de ${fmt(m,1)} % permitido`):''}
+    ${t>0?meter('Objetivo de la prueba',Math.max(0,gain),t,`${fmt(gain,2)} % de ${fmt(t,1)} %`):''}
+    ${!(d>0||m>0||t>0)?'<p class="hint">Añade las reglas de tu prueba en "Gestionar" para ver tus límites.</p>':''}
+    <p class="hint">Calculado con tus resultados en R y tu riesgo por operación (${fmt(risk,2)} %). Si te acercas al límite diario, te avisamos antes de que lo rompas.</p></div>`;
+}
+function openAccounts(){
+  const root=$('#sheet-root');
+  const accRow=(a,i)=>`<div class="card" style="padding:16px;gap:10px" data-row="${a.id}">
+    <div class="grid2">
+      <label class="field"><span class="label">Nombre</span><input class="input" data-k="name" value="${esc(a.name)}" maxlength="40"></label>
+      <label class="field"><span class="label">Tipo</span><select class="input" data-k="kind">${Object.entries(ACC_KIND).map(([k,l])=>`<option value="${k}" ${k===a.kind?'selected':''}>${l}</option>`).join('')}</select></label>
+      <label class="field full"><span class="label">Capital (€)</span><input class="input" data-k="balance" inputmode="decimal" value="${esc(a.balance)}" placeholder="Ej.: 100000"></label>
+      <div class="full grid2" data-funded ${a.kind==='fondeo'?'':'hidden'} style="grid-template-columns:repeat(3,minmax(0,1fr))">
+        <label class="field"><span class="label">Pérdida diaria %</span><input class="input" data-k="daily" inputmode="decimal" value="${esc(a.daily)}" placeholder="5"></label>
+        <label class="field"><span class="label">Caída máx. %</span><input class="input" data-k="maxdd" inputmode="decimal" value="${esc(a.maxdd)}" placeholder="10"></label>
+        <label class="field"><span class="label">Objetivo %</span><input class="input" data-k="target" inputmode="decimal" value="${esc(a.target)}" placeholder="8"></label>
+      </div>
+    </div>
+    ${i>0?`<button class="btn btn-danger btn-sm" data-delacc="${a.id}" style="justify-self:start">Eliminar cuenta</button>`:''}</div>`;
+  const paint=()=>{root.innerHTML=`<div class="sheet-bg" id="sh-bg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t">
+    <div class="sheet-head"><h2 id="sh-t">Mis cuentas</h2><button class="x" id="sh-x" aria-label="Cerrar">×</button></div>
+    <p class="muted">Lleva por separado tu cuenta personal, tus pruebas de fondeo o tu demo. Cada una con su journal y sus números, y un resumen de todas.</p>
+    ${S.accounts.map(accRow).join('')}
+    ${S.accounts.length<MAX_ACCOUNTS?'<button class="btn btn-ghost" id="acc-add">+ Añadir cuenta</button>':'<p class="hint">Máximo 3 cuentas.</p>'}
+    <p class="hint"><span class="chip violet">Pro</span> En Core tienes 1 cuenta. Con Pro, hasta 3 y el modo fondeo.</p>
+    <button class="btn btn-primary" id="acc-done">Listo</button></div></div>`;
+    $('#sh-x').onclick=close;$('#acc-done').onclick=close;$('#sh-bg').onclick=e=>{if(e.target.id==='sh-bg')close()};
+    root.querySelectorAll('[data-row]').forEach(r=>{const a=S.accounts.find(x=>x.id===r.dataset.row);
+      r.querySelectorAll('[data-k]').forEach(inp=>inp.oninput=inp.onchange=()=>{a[inp.dataset.k]=inp.value;if(inp.dataset.k==='kind')r.querySelector('[data-funded]').hidden=inp.value!=='fondeo';save()})});
+    root.querySelectorAll('[data-delacc]').forEach(b=>b.onclick=()=>{if(b.dataset.sure){const id=b.dataset.delacc;S.accounts=S.accounts.filter(a=>a.id!==id);S.journal.forEach(j=>{if(j.account===id)j.account=S.accounts[0].id});if(S.jAcc===id)S.jAcc='all';save();paint()}else{b.dataset.sure='1';b.textContent='¿Seguro? Sus entradas pasan a la primera cuenta'}});
+    $('#acc-add')?.addEventListener('click',()=>{S.accounts.push({id:'acc'+uid(),name:S.accounts.length===1?'Fondeo 100K':'Cuenta demo',kind:S.accounts.length===1?'fondeo':'demo',balance:S.accounts.length===1?'100000':'',daily:S.accounts.length===1?'5':'',maxdd:S.accounts.length===1?'10':'',target:S.accounts.length===1?'8':''});save();paint()});
+  };
+  const onKey=e=>{if(e.key==='Escape')close()};
+  const close=()=>{root.innerHTML='';document.removeEventListener('keydown',onKey);renderJour()};
+  document.addEventListener('keydown',onKey);paint();
 }
 function entryHTML(j){
   const date=new Date(j.date+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'short'});
   if(j.type==='skipped')return `<div class="entry"><div class="entry-top"><span class="chip blue">No realizada</span><b>${esc(j.market)}</b><span class="muted" style="font-size:13px">${date}</span>${j.sample?'<span class="tag">Ejemplo</span>':''}<button class="tag" data-del="${j.id}" style="margin-left:auto">Borrar</button></div><p class="muted">${esc(j.reason)}</p></div>`;
   const r=num(j.r);
   return `<div class="entry"><div class="entry-top"><b>${esc(j.market)}</b><span class="tag">${j.dir==='long'?'Compra':'Venta'}</span><span class="muted" style="font-size:13px">${date}${j.strategy?' · '+esc(j.strategy):''}</span><span class="r ${r>0?'pos':r<0?'neg':''}">${r>0?'+':''}${fmt(r,1)} R</span></div>
-    <div class="tags"><span class="tag ${j.compliance==='si'?'ok':'bad'}">Plan: ${COMPLIANCE[j.compliance]}</span>${j.emotion?`<span class="tag">${EMOTIONS[j.emotion]}</span>`:''}${j.error&&j.error!=='ninguno'?`<span class="tag bad">${ERRORS[j.error]}</span>`:''}${j.sample?'<span class="tag">Ejemplo</span>':''}<button class="tag" data-del="${j.id}" style="margin-left:auto">Borrar</button></div>
+    <div class="tags"><span class="tag ${j.compliance==='si'?'ok':'bad'}">Plan: ${COMPLIANCE[j.compliance]}</span>${j.emotion?`<span class="tag">${EMOTIONS[j.emotion]}</span>`:''}${j.error&&j.error!=='ninguno'?`<span class="tag bad">${ERRORS[j.error]}</span>`:''}${S.accounts.length>1?`<span class="tag">${esc(accName(j.account))}</span>`:''}${j.sample?'<span class="tag">Ejemplo</span>':''}<button class="tag" data-del="${j.id}" style="margin-left:auto">Borrar</button></div>
     ${j.lesson?`<p class="muted" style="font-size:14.5px">${esc(j.lesson)}</p>`:''}</div>`;
 }
 function loadSampleJournal(){
@@ -868,7 +943,9 @@ function loadSampleJournal(){
     ['trade',d(2),mk,'short','Ruptura',-1,'con_prisa','no','entrada_anticipada','Llegué tarde a la sesión y entré con prisa.'],
     ['trade',d(1),mk2,'long','Retroceso',2,'tranquilo','si','ninguno','Paciencia. Buena ejecución.'],
   ];
-  rows.forEach(([type,date,market,dir,strategy,r,emotion,compliance,error,lesson],i)=>S.journal.push(type==='skipped'?{id:uid(),ts:i,sample:true,type,date,market,reason:lesson}:{id:uid(),ts:i,sample:true,type,date,market,dir,strategy,r:String(r),emotion,compliance,error,lesson}));
+  const accOf=i=>(S.accounts.length>1&&[0,3,4,9].includes(i)?S.accounts[1]:S.accounts[0]).id; // reparte ganadoras y perdedoras entre cuentas
+  rows.forEach(([type,date,market,dir,strategy,r,emotion,compliance,error,lesson],i)=>S.journal.push(type==='skipped'?{id:uid(),ts:i,sample:true,account:accOf(i),type,date,market,reason:lesson}:{id:uid(),ts:i,sample:true,account:accOf(i),type,date,market,dir,strategy,r:String(r),emotion,compliance,error,lesson}));
+  S.journal.push({id:uid(),ts:9,sample:true,account:accOf(9),type:'trade',date:isoToday(),market:mk,dir:'long',strategy:'Ruptura',r:'-1',emotion:'ansioso',compliance:'en_parte',error:'cierre_anticipado',lesson:'Hoy me costó esperar.'});
   save();renderJour();toast('Entradas de ejemplo cargadas');
 }
 function openEntry(){
@@ -882,6 +959,7 @@ function openEntry(){
     <div class="grid2">
       <label class="field"><span class="label">Fecha</span><input class="input" type="date" id="e-date" value="${e.date}"></label>
       <label class="field"><span class="label">Mercado</span><select class="input" id="e-mk">${markets.map(x=>`<option>${esc(x)}</option>`).join('')}</select></label>
+      ${S.accounts.length>1?`<label class="field full"><span class="label">Cuenta</span><select class="input" id="e-acc">${S.accounts.map(a=>`<option value="${a.id}" ${a.id===S.jAcc?'selected':''}>${esc(a.name)}</option>`).join('')}</select></label>`:''}
     </div>
     <div id="e-trade" style="display:grid;gap:14px">
       <div class="field"><span class="label">Dirección</span>${seg('e-dir',{long:'Compra',short:'Venta'},'long')}</div>
@@ -907,7 +985,7 @@ function openEntry(){
   bindSeg('e-type','type',()=>{$('#e-trade').hidden=e.type!=='trade';$('#e-skip').hidden=e.type==='trade'});
   bindSeg('e-dir','dir');bindSeg('e-emo','emotion');bindSeg('e-comp','compliance');bindSeg('e-err','error');
   $('#e-save').onclick=()=>{
-    e.date=$('#e-date').value;e.market=$('#e-mk').value;const errs=[];
+    e.date=$('#e-date').value;e.market=$('#e-mk').value;e.account=$('#e-acc')?.value||(S.jAcc!=='all'?S.jAcc:S.accounts[0].id);const errs=[];
     if(!e.date)errs.push('Indica la fecha.');
     if(e.type==='trade'){e.strategy=$('#e-str').value.trim();e.r=$('#e-r').value.trim();e.lesson=$('#e-les').value.trim();
       if(!e.r||isNaN(num(e.r)))errs.push('Escribe el resultado en R (por ejemplo 2, -1 o 0,5).');
@@ -933,6 +1011,7 @@ function context(){
    'Checklist: '+checklistItems().join(' | '),
    `Calendario de hoy (${DAY_NAMES[t-1]}): `+(dayBlocks(t).map(b=>`${hhmm(b.start)} ${b.title} (${dur(b.dur)})`).join('; ')||'sin bloques'),
    `Hora actual: ${hhmm(nowMin())}`,
+   `Cuentas: ${S.accounts.map(a=>a.name+' ('+ACC_KIND[a.kind]+(a.kind==='fondeo'&&a.daily?', pérdida diaria máx. '+a.daily+' %, caída máx. '+a.maxdd+' %':'')+')').join('; ')}`,
    `Journal: ${st.n} operaciones, cumplimiento ${fmt(st.comp,0)} %, ${fmt(st.R,1)} R acumulado, ${st.skipped} no realizadas. Patrones: `+(patterns().map(p=>`${p.label} (${p.n} veces en operaciones fuera de plan)`).join(', ')||'ninguno')].join('\n');
 }
 function rules(){return `Eres el "Copiloto" de Time to Trade, una app de planificación y disciplina para traders de todos los niveles. Hablas en español de España, de tú, con calidez, como un buen mentor. Respuestas de 2 a 6 frases salvo que te pidan más. Sin markdown pesado.

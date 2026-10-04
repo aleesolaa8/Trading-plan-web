@@ -63,8 +63,10 @@ create table public.plans (
   id              text primary key,                       -- 'free','core','pro','premium'
   name            text not null,
   is_active       boolean not null default false,         -- solo 'core' activo al inicio
-  stripe_price_id text,                                   -- o env STRIPE_PRICE_CORE
+  stripe_price_id text,                                   -- mensual (o env STRIPE_PRICE_CORE)
+  stripe_price_id_annual text,                            -- anual  (o env STRIPE_PRICE_CORE_ANNUAL)
   price_cents     integer,                                -- caché informativa; la verdad es Stripe
+  price_cents_annual integer,                             -- caché informativa del precio anual
   currency        text not null default 'eur',
   interval        text not null default 'month' check (interval in ('month','year')),
   trial_days      integer not null default 0 check (trial_days >= 0),
@@ -86,6 +88,7 @@ create table public.subscriptions (
   status                 text not null check (status in
                            ('trialing','active','past_due','canceled','unpaid','incomplete','incomplete_expired','paused')),
   current_period_end     timestamptz,
+  billing_interval       text not null default 'month' check (billing_interval in ('month','year')),
   cancel_at_period_end   boolean not null default false,
   trial_end              timestamptz,
   created_at             timestamptz not null default now(),
@@ -291,9 +294,30 @@ create table public.checklist_runs (
 -- ---------------------------------------------------------------------
 -- 8. Journal
 -- ---------------------------------------------------------------------
+-- Cuentas de trading (Core: 1, Pro: hasta 3; el límite lo controla plans.features)
+create table public.trading_accounts (
+  id               uuid primary key default gen_random_uuid(),
+  user_id          uuid not null references auth.users(id) on delete cascade,
+  name             text not null check (char_length(name) between 1 and 40),
+  kind             text not null default 'personal' check (kind in ('personal','fondeo','demo')),
+  balance          numeric(14,2) check (balance >= 0),
+  currency         text not null default 'EUR',
+  -- Reglas de la prueba de fondeo (solo kind = 'fondeo'), en % del capital inicial
+  daily_loss_pct   numeric(5,2) check (daily_loss_pct > 0 and daily_loss_pct <= 100),
+  max_drawdown_pct numeric(5,2) check (max_drawdown_pct > 0 and max_drawdown_pct <= 100),
+  profit_target_pct numeric(6,2) check (profit_target_pct > 0),
+  is_archived      boolean not null default false,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+create index trading_accounts_user_idx on public.trading_accounts(user_id);
+create trigger trading_accounts_updated before update on public.trading_accounts
+  for each row execute function public.set_updated_at();
+
 create table public.journal_entries (
   id             uuid primary key default gen_random_uuid(),
   user_id        uuid not null references auth.users(id) on delete cascade,
+  account_id     uuid references public.trading_accounts(id) on delete set null,
   entry_type     text not null default 'trade' check (entry_type in ('trade','skipped')),
   trade_date     date not null default current_date,
   asset_name     text not null,
@@ -409,6 +433,7 @@ alter table public.checklist_runs    enable row level security;
 alter table public.journal_entries   enable row level security;
 alter table public.weekly_reviews    enable row level security;
 alter table public.ai_usage          enable row level security;
+alter table public.trading_accounts  enable row level security;
 alter table public.chat_threads      enable row level security;
 alter table public.chat_messages     enable row level security;
 
@@ -463,7 +488,7 @@ begin
   foreach t in array array[
     'quiz_responses','trading_plans','plan_versions','calendar_blocks','assets',
     'account_settings','checklist_items','checklist_runs','journal_entries','weekly_reviews',
-    'chat_threads','chat_messages'
+    'chat_threads','chat_messages','trading_accounts'
   ] loop
     execute format(
       'create policy "solo propietario" on public.%I for all

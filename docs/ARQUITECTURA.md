@@ -220,29 +220,47 @@ Pendiente: reenviar el brief maestro, el prototipo HTML y las capturas de Gotoyo
 
 ## 7 bis. Planes y precios
 
-Principio: **Core es completo** para operar con un plan (nadie se queda fuera por no pagar Pro). Pro suma lo que cuesta más (IA intensiva) y lo que piden quienes operan muchas horas o con cuenta de fondeo.
+Principio: **Core es completo** para operar con un plan. Pro suma lo que más cuesta (IA intensiva) y lo que piden quienes operan muchas horas, con fondeo o con varias cuentas.
 
-| | **Core · 14,99 € + IVA/mes** | **Pro · 24,99 € + IVA/mes** |
+| | **Core** | **Pro** |
 |---|---|---|
+| Mensual | 14,99 € + IVA | 24,99 € + IVA |
+| Anual (2 meses gratis) | 149,90 € + IVA (≈ 12,49 €/mes) | 249,90 € + IVA (≈ 20,83 €/mes) |
 | Diagnóstico, plan con tus reglas y versiones | Sí (3 regeneraciones con IA/mes) | Sí (20/mes) |
-| Protocolos editables | Sí | Sí |
-| Calendario semanal (trading y vida) | Sí | Sí |
-| Calculadora para cualquier mercado y checklist | Sí | Sí |
+| Protocolos, calendario, calculadora, checklist | Sí | Sí |
 | Journal ilimitado + patrones sin juicio | Sí | Sí |
 | Resumen semanal de números | Sí | Sí |
-| Copiloto 24 h | 30 mensajes/mes (para probarlo) | Sin límite (uso razonable: 1.500/mes) |
+| Recordatorios de sesión y de límite diario | Sí | Sí |
+| Exportar tus datos (CSV) | Sí | Sí |
+| Copiloto 24 h | 40 mensajes/mes | Sin límite (uso razonable: 1.500/mes) |
 | Revisión semanal escrita por IA con propuestas al plan | — | Sí |
 | IA que revisa capturas contra el setup escrito (sin señales) | — | Sí |
 | Estadísticas avanzadas (mercado, hora, día, emoción, rachas) | — | Sí |
-| Modo cuenta de fondeo (límites de la prueba y avisos) | — | Sí |
-| Varias cuentas o planes | 1 | Hasta 3 |
-| Recordatorios de sesión y de límite diario | — | Sí |
-| Exportar plan y journal (PDF/CSV) | — | Sí |
+| Cuentas de trading (personal, fondeo, demo) + resumen conjunto | 1 | Hasta 3 |
+| Modo fondeo (pérdida diaria, caída máxima, objetivo, avisos) | — | Sí |
+| Informe mensual en PDF | — | Sí |
 
-- 7 días de prueba con todo Pro; al acabar, el usuario elige plan. Sin permanencia; cambio de plan desde el Customer Portal.
-- Los límites viven en `plans.features` (JSON): se cambian sin desplegar.
-- Opcional, a decidir: pago anual con 2 meses gratis (149,90 € y 249,90 € + IVA).
-- Cuando el usuario de Core llega a su límite del copiloto, ve un aviso amable con la opción de pasar a Pro; nunca se bloquea el resto de la app.
+- **Cambios respecto a la primera propuesta:** recordatorios y exportar CSV pasan a Core (son baratos, ayudan a cumplir el plan y exportar los propios datos es un derecho del usuario); el copiloto de Core sube de 30 a 40 mensajes; Pro gana el informe mensual en PDF.
+- 7 días de prueba con todo Pro; al terminar el usuario elige plan y, si no elige, no se cobra nada. Sin permanencia; cambio de plan con prorrateo desde el Customer Portal.
+- Los límites viven en `plans.features` (JSON) y se cambian sin desplegar. Precios anuales: `STRIPE_PRICE_CORE_ANNUAL`, `STRIPE_PRICE_PRO_ANNUAL`; `subscriptions.billing_interval` guarda mes o año.
+- Al agotar los mensajes del copiloto en Core, aviso amable con opción de pasar a Pro; nunca se bloquea el resto de la app.
+- Cuentas: tabla `trading_accounts` (tipo personal/fondeo/demo, capital y reglas de la prueba en %). Cada entrada del journal apunta a su cuenta.
+
+## 7 ter. Alojamiento y puesta en producción
+
+**Formato:** plataforma web (no una landing) que funciona en el navegador del ordenador y del móvil, e **instalable como app** (PWA: icono en el escritorio o en la pantalla de inicio, sin pasar por las tiendas). Una app nativa para iOS/Android puede añadirse más adelante si hace falta; no es necesaria para empezar.
+
+| Pieza | Servicio | Por qué | Coste orientativo |
+|---|---|---|---|
+| Web y servidor | **Vercel** (plan Pro) | Hecho por los creadores de Next.js; escala solo con las visitas, CDN mundial, despliegue al subir cambios | ~20 $/mes |
+| Base de datos, usuarios y archivos | **Supabase** (plan Pro, región UE) | Postgres gestionado, copias diarias, datos en Europa (RGPD) | ~25 $/mes + uso |
+| Pagos e IVA | **Stripe** + Stripe Tax | Cobros, facturas, IVA por país | Comisión por cobro, sin cuota fija |
+| IA | **API de Anthropic** | Plan, revisiones y copiloto | Por uso; controlado por los límites de cada plan |
+| Dominio y correo | Registrador + correo transaccional (Resend o similar) | timetotrade.com o similar; emails de acceso y recordatorios | ~15 €/año + ~0–20 $/mes |
+
+- **Capacidad:** esta combinación aguanta de cero a decenas de miles de usuarios sin cambiar la arquitectura; se paga más solo si hay más uso.
+- **Fiabilidad:** monitorización de errores (Sentry), copias diarias de la base de datos y entornos separados de pruebas y producción.
+- **Lo que hace falta del cliente:** crear las cuentas de Vercel, Supabase, Stripe y Anthropic a su nombre (son suyas y de su empresa) y comprar el dominio. Se le guiará paso a paso.
 
 ## 8 bis. Copiloto 24 h (chat con IA)
 

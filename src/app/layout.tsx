@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   description:
     'Diagnóstico, plan escrito con tus reglas, calendario de vida, calculadora de riesgo y journal con patrones. Sin señales ni promesas.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  icons: { icon: '/icon.svg', apple: '/icon.svg' },
+  appleWebApp: { capable: true, title: 'Time to Trade', statusBarStyle: 'black-translucent' },
 }
 
 export const viewport: Viewport = {
